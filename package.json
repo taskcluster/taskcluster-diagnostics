@@ -18,7 +18,7 @@
     "slugid":                           "1.0.2",
     "taskcluster-base":                 "0.5.5",
     "mocha":                            "1.21.4",
-    "taskcluster-client":               "0.15.5"
+    "taskcluster-client":               "0.17.9"
   },
   "engines": {
     "node":                             "0.10.x"

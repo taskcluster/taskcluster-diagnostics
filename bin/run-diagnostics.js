@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+/* jslint node: true */
+
+'use strict';
+
 var base        = require('taskcluster-base');
 var debug       = require('debug')('diagnostics:bin:run-diagnostics');
 var Mocha       = require('mocha');
@@ -40,7 +44,8 @@ var runDiagnostics = function() {
   [
     // Tests against production queue
     'queue/ping.js',
-    'queue/createTask.js'
+    'queue/createTask.js',
+    'queue/helloWorld.js'
   ].forEach(function(filename) {
     mocha.addFile(path.join(__dirname, '..', 'diagnostics', filename));
   });
@@ -66,13 +71,13 @@ if (!module.parent) {
   // Find configuration profile
   var profile = process.argv[2];
   if (!profile) {
-    console.log("Usage: run-diagnostics.js [profile]")
+    console.log("Usage: run-diagnostics.js [profile]");
     console.error("ERROR: No configuration profile is provided");
     process.exit(1);
   }
   // Run diagnostics with given profile
   runDiagnostics(profile).then(function() {
-    debug("Ran diagnostics"); 
+    debug("Ran diagnostics");
     // We should exit zero
     process.exit(0);
   }).catch(function(err) {
