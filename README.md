@@ -30,6 +30,10 @@ Example of `taskcluster-diagnostics.conf.json`:
       "clientId":           "2wLPBe_YTJOnetPudn4VzQ",
       "accessToken":        "27hxpUPgR7uYU3MYgMkqTQB4CTe614S6SfG0Ky54Lbew"
     }
+  },
+  "pulse": {
+    "username":             "my-pulse-username",
+    "password":             "my-pulse-password"
   }
 }
 ```
