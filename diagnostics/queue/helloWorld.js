@@ -17,7 +17,7 @@ var teardown = function() {
 suite("helloWorld", function() {
   var assert              = require('assert');
   var base                = require('taskcluster-base');
-  var utils               = require("../utils");
+  var helper               = require("../helper")();
   var slugid              = require("slugid");
   var debug               = require("debug")("diagnostics:queue:helloWorld");
   var taskcluster         = require("taskcluster-client");
@@ -26,14 +26,14 @@ suite("helloWorld", function() {
   // Set an excessive timeout:
   this.timeout(10 * 60 * 1000);
 
-  test("Can create docker instance... ", function() {
-    var cfg = base.config({filename: 'taskcluster-diagnostics'});
-
+  test("Can create docker-worker task (workerType: v2)", function() {
     // Create a taskId (url-safe base64 encoded uuid without '=' padding):
     var taskId = slugid.v4();
     debug("TaskId is: " + taskId);
-    listener = new taskcluster.PulseListener(cfg.get('pulseListener'));
-    listener.bind(utils.queueEvents.taskCompleted({taskId: taskId}));
+    listener = new taskcluster.PulseListener({
+      credentials:      helper.cfg.get('pulse')
+    });
+    listener.bind(helper.queueEvents.taskCompleted({taskId: taskId}));
 
     var gotMessage = new Promise(function(accept, reject) {
       listener.on("message", function(message) {
@@ -48,7 +48,7 @@ suite("helloWorld", function() {
     // Wait for taskCompletedHandler to be ready, ie. for listenFor
     // to have started the PulseListener
     return listener.resume().then(function() {
-      return utils.queue.createTask(taskId, {
+      return helper.queue.createTask(taskId, {
         provisionerId:    "aws-provisioner",
         workerType:       "v2",
         created:          new Date().toJSON(),
