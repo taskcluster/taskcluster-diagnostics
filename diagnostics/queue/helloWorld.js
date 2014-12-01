@@ -38,6 +38,7 @@ suite("helloWorld", function() {
     var gotMessage = new Promise(function(accept, reject) {
       listener.on("message", function(message) {
         assert(message.payload.status.taskId === taskId, "Got wrong taskId");
+        assert(message.payload.success === true, "Task failed.")
         accept();
       });
       listener.on("error", function(){
