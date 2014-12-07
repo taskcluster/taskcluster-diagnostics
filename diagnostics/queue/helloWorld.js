@@ -17,7 +17,7 @@ var teardown = function() {
 suite("helloWorld", function() {
   var assert              = require('assert');
   var base                = require('taskcluster-base');
-  var helper               = require("../helper")();
+  var helper              = require("../helper")();
   var slugid              = require("slugid");
   var debug               = require("debug")("diagnostics:queue:helloWorld");
   var taskcluster         = require("taskcluster-client");
@@ -30,24 +30,10 @@ suite("helloWorld", function() {
     // Create a taskId (url-safe base64 encoded uuid without '=' padding):
     var taskId = slugid.v4();
     debug("TaskId is: " + taskId);
-    listener = new taskcluster.PulseListener({
-      credentials:      helper.cfg.get('pulse')
-    });
-    listener.bind(helper.queueEvents.taskCompleted({taskId: taskId}));
 
-    var gotMessage = new Promise(function(accept, reject) {
-      listener.on("message", function(message) {
-        assert(message.payload.status.taskId === taskId, "Got wrong taskId");
-        accept();
-      });
-      listener.on("error", function(){
-        reject();
-      });
-    });
-
-    // Wait for taskCompletedHandler to be ready, ie. for listenFor
-    // to have started the PulseListener
-    return listener.resume().then(function() {
+    return helper.receiver.listenFor('docker-workerType-v2-task', helper.queueEvents.taskCompleted({
+      taskId: taskId
+    })).then(function() {
       return helper.queue.createTask(taskId, {
         provisionerId:    "aws-provisioner",
         workerType:       "v2",
@@ -56,6 +42,7 @@ suite("helloWorld", function() {
         payload:          {
           image:          "ubuntu:14.04",
           command:        ["/bin/bash", "-c", "echo 'Hello World'"],
+          maxRunTime:     1000,
         },
         metadata: {
           name:           "Docker Hello World test",
@@ -64,9 +51,11 @@ suite("helloWorld", function() {
           source:         "https://github.com/taskcluster/taskcluster-diagnostics"
         }
       });
-    }).then(function() {
-      debug("Created a task, now waiting for message about completion");
-      return gotMessage;
+    }).then(function(){
+      return helper.receiver.waitFor('docker-workerType-v2-task');
+    }).then(function(message){
+        assert(message.payload.status.taskId === taskId, "Got wrong taskId");
+        assert(message.payload.success === true, "Task failed.");
     });
   });
 });
