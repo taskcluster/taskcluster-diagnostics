@@ -1,3 +1,4 @@
+'use strict';
 var taskcluster         = require('taskcluster-client');
 
 /** Initialize utilities with all the configuration we have */
@@ -9,6 +10,7 @@ var initialize = function(options) {
   exports.queue = new taskcluster.Queue({
     credentials:      options.taskcluster.credentials
   });
+  exports.queueEvents = new taskcluster.QueueEvents();
 };
 
 // Export the initialize function
