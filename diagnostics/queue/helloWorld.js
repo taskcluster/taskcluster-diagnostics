@@ -56,6 +56,7 @@ suite("helloWorld", function() {
         payload:          {
           image:          "ubuntu:14.04",
           command:        ["/bin/bash", "-c", "echo 'Hello World'"],
+          maxRunTime:     1000
         },
         metadata: {
           name:           "Docker Hello World test",
