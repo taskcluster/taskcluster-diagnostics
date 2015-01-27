@@ -10,15 +10,15 @@
     "url":    "https://github.com/taskcluster/taskcluster-diagnostics.git"
   },
   "dependencies": {
-    "promise":                          "6.0.0",
+    "promise":                          "6.0.1",
     "lodash":                           "2.4.1",
-    "debug":                            "2.0.0",
-    "superagent":                       "0.18.2",
-    "superagent-promise":               "0.1.2",
-    "slugid":                           "1.0.2",
-    "taskcluster-base":                 "0.5.5",
-    "mocha":                            "1.21.4",
-    "taskcluster-client":               "0.17.9"
+    "debug":                            "2.1.0",
+    "superagent":                       "0.21.0",
+    "superagent-promise":               "0.2.0",
+    "slugid":                           "1.0.3",
+    "taskcluster-base":                 "0.6.3",
+    "mocha":                            "2.0.1",
+    "taskcluster-client":               "0.17.11"
   },
   "engines": {
     "node":                             "0.10.x"

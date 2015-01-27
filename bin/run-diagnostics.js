@@ -8,31 +8,14 @@ var debug       = require('debug')('diagnostics:bin:run-diagnostics');
 var Mocha       = require('mocha');
 var path        = require('path');
 var Promise     = require('promise');
-var utils       = require('../diagnostics/utils');
+var initHelper  = require('../diagnostics/helper');
 
 /** Run diagnostics */
-var runDiagnostics = function() {
-
-  // Load configuration
-  var cfg = base.config({
-    defaults:     require('../config/defaults'),
-    profile:      require('../config/' + profile),
-    // Environment variables to load configuration from
-    envs: [
-      'taskcluster_credentials_clientId',
-      'taskcluster_credentials_accessToken'
-    ],
-    // Will load configration from taskcluster-diagnostics.conf.json
-    // this is useful for local development as the file is .gitignored
-    filename:     'taskcluster-diagnostics'
-  });
-
-  // Initialize diagnostic utilites, this will provide instances of things
-  // like taskcluster-client objects, utilities for listening for AMQP messages
-  // and basically anything that helps avoid repretitive code.
-  // For ease of use we'll let it store configuration/credentials in its global
-  // scope...
-  utils.initialize(cfg.get());
+var runDiagnostics = function(profile) {
+  // Set default profile on initHelper, so that when tests require it as
+  //    var helper = require('../helper')();
+  // they will get a newly instantiated helper with the profile given here.
+  initHelper.defaultProfile = profile;
 
   // Create mocha instance
   var mocha = new Mocha({
@@ -45,7 +28,8 @@ var runDiagnostics = function() {
     // Tests against production queue
     'queue/ping.js',
     'queue/createTask.js',
-    'queue/helloWorld.js'
+    'queue/helloWorld.js',
+    'docker-worker/environmentVariables.js'
   ].forEach(function(filename) {
     mocha.addFile(path.join(__dirname, '..', 'diagnostics', filename));
   });
