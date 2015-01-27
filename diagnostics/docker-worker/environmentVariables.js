@@ -12,10 +12,10 @@ suite("test environment variables", function() {
     // Create a taskId
     var taskId = slugid.v4();
 
-    // Start listening for a task-completed message with the generated taskId
+    // Start listening for a task-failed message with the generated taskId
     return helper.receiver.listenFor(
-      'completed',
-      helper.queueEvents.taskCompleted({taskId: taskId})
+      'failed',
+      helper.queueEvents.taskFailed({taskId: taskId})
     ).then(function() {
       // Create task
       debug("Submitting task: %s", taskId);
@@ -46,12 +46,10 @@ suite("test environment variables", function() {
       // Retrow the error
       throw err;
     }).then(function() {
-      return helper.receiver.waitFor('completed');
+      return helper.receiver.waitFor('failed');
     }).then(function(message) {
-      // Completion message should have success == false, because we exited
-      // non-zero (if the environment variables was inserted correctly)
-      assert(message.payload.success === false,
-             "Expected task to complete unsuccessfully");
+      assert(message.payload.status.taskId === taskId,
+             "Expected message to have taskId");
     });
   });
 
@@ -94,10 +92,8 @@ suite("test environment variables", function() {
     }).then(function() {
       return helper.receiver.waitFor('completed');
     }).then(function(message) {
-      // Completion message should have success == true, because we exited
-      // zero (if the environment variables was inserted correctly)
-      assert(message.payload.success === true,
-             "Expected task to complete unsuccessfully");
+      assert(message.payload.status.taskId === taskId,
+             "Expected message to have taskId");
     });
   });
 });
