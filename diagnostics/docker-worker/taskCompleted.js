@@ -46,7 +46,16 @@ suite("test environment variables", function() {
         }
       });
     }).then(function(){
-      return helper.receiver.waitFor('defined');
+      return helper.receiver.listenFor(
+        'taskPending',
+        helper.queueEvents.taskPending({taskId: taskId}));
+    }).then(function(){
+      console.log("scheduling Task");
+      return helper.queue.scheduleTask(taskId); //note, here we don't pass an object?!
+    }).then(function(){
+      //console.log("waiting for task pending")
+      //return helper.receiver.waitFor('taskPending');
+
     });
   });
 });
