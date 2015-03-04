@@ -51,11 +51,30 @@ suite("test environment variables", function() {
         helper.queueEvents.taskPending({taskId: taskId}));
     }).then(function(){
       console.log("scheduling Task");
-      return helper.queue.scheduleTask(taskId); //note, here we don't pass an object?!
+      return helper.queue.scheduleTask(taskId); //note, here we don't pass an object?! This isn't clear from the taskcluster-client docs
     }).then(function(){
-      //console.log("waiting for task pending")
-      //return helper.receiver.waitFor('taskPending');
-
+      console.log("listening for task running");
+      return helper.receiver.listenFor(
+        'taskRunning',
+        helper.queueEvents.taskRunning(taskId));
+    }).then(function(){
+      console.log("claiming task");
+      return helper.queue.claimTask(taskId, 0, {
+        workerGroup: "test-worker-group",
+        workerId: "test-worker-id",
+    });
+    }).then(function(){
+      console.log("listening for task complete");
+      return helper.receiver.listenFor(
+        'taskCompleted',
+        helper.queueEvents.taskCompleted(taskId));
+    }).then(function(){
+      console.log("reporting completed");
+      return helper.queue.reportCompleted(taskId, 0, {});
+    }).then(function(){
+      console.log("waiting for task completed");
+      return helper.receiver.waitFor('taskCompleted');
     });
   });
 });
+
