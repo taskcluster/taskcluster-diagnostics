@@ -1,20 +1,31 @@
 /* global suite, test */
 /* jslint node: true */
-
 "use strict";
 
-suite("test environment variables", function() {
+/*
+A taskcluster integration test which exercises the following API endpoints:
+taskPending, scheduleTask, taskRunning, claimTask, taskComplete, createArtifact,
+buildUrl and reportComplete.
+
+This task this test creates is expected to exit with status 0.
+*/
+
+suite("Integration test with task exiting 0", function() {
   var assert              = require('assert');
   var helper              = require('../helper')();
   var slugid              = require('slugid');
   var taskcluster         = require('taskcluster-client');
   var debug               = require('debug')('diagnostics:queue:createTask');
+  var request             = require('superagent');
 
   // Set an excessive timeout
   this.timeout(30 * 60 * 1000);
 
-  test("exit $MY_ENV_VAR; with MY_ENV_VAR = 0", function() {
+  test("exit $MY_ENV_VAR; with MY_ENV_VAR = 0", function(done) {
     var taskId = slugid.v4();
+    var testArtifact = '{"public test artifact": "foobar"}';
+    var testArtifactName = 'public/public-test-artifact.txt';
+    var runID = 0;
 
     return helper.receiver.listenFor(
       'defined',
@@ -48,12 +59,14 @@ suite("test environment variables", function() {
         'taskPending',
         helper.queueEvents.taskPending({taskId: taskId}));
     }).then(function(){
+      debug("Scheduling task");
       return helper.queue.scheduleTask(taskId); //note, here we don't pass an object?! This isn't clear from the taskcluster-client docs
     }).then(function(){
       return helper.receiver.listenFor(
         'taskRunning',
         helper.queueEvents.taskRunning({taskId: taskId}));
     }).then(function(){
+      debug("Claiming task");
       return helper.queue.claimTask(taskId, 0, {
         workerGroup: "test-worker-group",
         workerId: "test-worker-id"
@@ -63,6 +76,47 @@ suite("test environment variables", function() {
         'taskCompleted',
         helper.queueEvents.taskCompleted({taskId: taskId}));
     }).then(function(){
+      /*
+      In this phase of the test we create an artifact and then retrieve it
+      and assert that retrieved === expected. To do this we:
+      1) ask the Queue to provide us with a URL we can PUT to, by calling
+         queue.createArtifact.
+      2) Then we submit a PUT with the test artifact to the url we were give.
+      3) We use queue.buildURL to get the URL at which the test artifact is
+         available, do a GET and compare the received artifact to the
+         expected artifact.
+      */
+      var artifactOptions = {
+        "storageType": "s3",
+        "expires": taskcluster.utils.fromNow("1 hour"),
+        "contentType": "application/json",
+      };
+      return helper.queue.createArtifact(taskId, runID, testArtifactName, artifactOptions);
+    }).then(function(queueResponse){
+      // 2) We've received a response from the Queue, it should have a PUT URL in it.
+      debug("Creating artifact");
+      if (queueResponse.putUrl) {
+        request.put(queueResponse.putUrl)
+        .set('Content-Type', 'application/json')
+        .set("Content-Length", testArtifact.length)
+        .send(testArtifact).end();
+      } else {
+        throw new Error("Did not receive a putUrl from the Queue");
+      }
+    })
+    .then(function(){
+      // 3) GET the artifact
+      var artifactUrl = helper.queue.buildUrl(helper.queue.getArtifact, taskId, runID, testArtifactName);
+      request.get(artifactUrl).end(function(err, response){
+        debug("Getting artifact");
+        if (response.ok) {
+          assert(response.text === testArtifact, "Received artifact does not match expected.");
+          done();
+        } else {
+          throw new Error("Request for Artifact failed.");
+        }
+      });
+    }).then(function () {
       return helper.queue.reportCompleted(taskId, 0, {});
     }).then(function(){
       return helper.receiver.waitFor('taskCompleted');
