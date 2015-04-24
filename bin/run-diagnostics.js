@@ -28,9 +28,7 @@ var runDiagnostics = function(profile) {
     // Tests against production queue
     'queue/ping.js',
     'queue/createTask.js',
-    //'queue/helloWorld.js',
     'docker-worker/taskCompleted.js',
-    //'docker-worker/taskFailed.js',
   ].forEach(function(filename) {
     mocha.addFile(path.join(__dirname, '..', 'diagnostics', filename));
   });
