@@ -16,13 +16,14 @@ suite("Integration test with task exiting 0", function() {
   var slugid              = require('slugid');
   var taskcluster         = require('taskcluster-client');
   var debug               = require('debug')('diagnostics:queue:createTask');
-  var request             = require('superagent');
+  var request             = require('superagent-promise');
 
   // Set an excessive timeout
   this.timeout(30 * 60 * 1000);
 
-  test("exit $MY_ENV_VAR; with MY_ENV_VAR = 0", function(done) {
+  test("exit $MY_ENV_VAR; with MY_ENV_VAR = 0", function() {
     var taskId = slugid.v4();
+    debug("TaskId is: " + taskId);
     var testArtifact = '{"public test artifact": "foobar"}';
     var testArtifactName = 'public/public-test-artifact.txt';
     var runID = 0;
@@ -96,10 +97,10 @@ suite("Integration test with task exiting 0", function() {
       // 2) We've received a response from the Queue, it should have a PUT URL in it.
       debug("Creating artifact");
       if (queueResponse.putUrl) {
-        request.put(queueResponse.putUrl)
-        .set('Content-Type', 'application/json')
-        .set("Content-Length", testArtifact.length)
-        .send(testArtifact).end();
+        return request.put(queueResponse.putUrl)
+            .set('Content-Type', 'application/json')
+            .set("Content-Length", testArtifact.length)
+            .send(testArtifact).end();
       } else {
         throw new Error("Did not receive a putUrl from the Queue");
       }
@@ -107,14 +108,9 @@ suite("Integration test with task exiting 0", function() {
     .then(function(){
       // 3) GET the artifact
       var artifactUrl = helper.queue.buildUrl(helper.queue.getArtifact, taskId, runID, testArtifactName);
-      request.get(artifactUrl).end(function(err, response){
-        debug("Getting artifact");
-        if (response.ok) {
-          assert(response.text === testArtifact, "Received artifact does not match expected.");
-          done();
-        } else {
-          throw new Error("Request for Artifact failed.");
-        }
+      return request.get(artifactUrl).end().then(function(response) {
+        assert(response.statusCode === 200, "Expected statusCode 200");
+        assert(response.text === testArtifact, "Received artifact does not match expected.");
       });
     }).then(function () {
       return helper.queue.reportCompleted(taskId, 0, {});
