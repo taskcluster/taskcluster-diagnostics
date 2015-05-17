@@ -6,8 +6,6 @@
 A taskcluster integration test which exercises the following API endpoints:
 taskPending, scheduleTask, taskRunning, claimTask, taskComplete, createArtifact,
 buildUrl and reportComplete.
-
-This task this test creates is expected to exit with status 0.
 */
 
 suite("Integration test with task exiting 0", function() {
@@ -61,7 +59,7 @@ suite("Integration test with task exiting 0", function() {
         helper.queueEvents.taskPending({taskId: taskId}));
     }).then(function(){
       debug("Scheduling task");
-      return helper.queue.scheduleTask(taskId); //note, here we don't pass an object?! This isn't clear from the taskcluster-client docs
+      return helper.queue.scheduleTask(taskId);
     }).then(function(){
       return helper.receiver.listenFor(
         'taskRunning',

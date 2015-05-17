@@ -29,6 +29,7 @@ var runDiagnostics = function(profile) {
     'queue/ping.js',
     'queue/createTask.js',
     'docker-worker/taskCompleted.js',
+    'docker-worker/taskFailed.js',
   ].forEach(function(filename) {
     mocha.addFile(path.join(__dirname, '..', 'diagnostics', filename));
   });
