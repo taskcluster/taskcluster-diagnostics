@@ -11,7 +11,7 @@ Task status is the parameterized value; the test is run for both the passing and
 failing case.
 */
 
-suite("Integration test with passing and failing task", function() {
+suite('Integration test with passing and failing task', function() {
   var assert              = require('assert');
   var helper              = require('../helper')();
   var slugid              = require('slugid');
@@ -24,11 +24,11 @@ suite("Integration test with passing and failing task", function() {
   var statuses = ['0', '1']; //
 
   statuses.forEach(function(task_status){
-    test("exit $MY_ENV_VAR; with MY_ENV_VAR = " + task_status, function() {
+    test('exit $MY_ENV_VAR; with MY_ENV_VAR = ' + task_status, function() {
       var taskId = slugid.v4();
-      debug("TaskId is: " + taskId);
+      debug('TaskId is: ' + taskId);      
       var testArtifact = '{"public test artifact": "foobar"}';
-      var testArtifactName = 'public/public-test-artifact.txt';
+      var testArtifactName = 'public/logs/live.log';
       var runID = 0;
 
       //
@@ -36,11 +36,11 @@ suite("Integration test with passing and failing task", function() {
         'defined',
         helper.queueEvents.taskDefined({taskId: taskId})
       ).then(function(){
-        debug("Submitting task: %s", taskId);
+        debug('Submitting task: %s', taskId);
 
         return helper.queue.createTask(taskId, {
-          provisionerId:    'aws-provisioner',
-          workerType:       'v2',
+          provisionerId:    "aws-provisioner",
+          workerType:       "v2",
           created:          taskcluster.utils.fromNow(),
           deadline:         taskcluster.utils.fromNow('1 hour'),
           payload:          {
@@ -49,7 +49,7 @@ suite("Integration test with passing and failing task", function() {
             env: {
               MY_ENV_VAR:   task_status
             },
-            maxRunTime:     20 * 60
+            maxRunTime:     20 * 60,
           },
           metadata: {
             name:           "Task test",
@@ -64,17 +64,17 @@ suite("Integration test with passing and failing task", function() {
           'taskPending',
           helper.queueEvents.taskPending({taskId: taskId}));
       }).then(function(){
-        debug("Scheduling task");
+        debug('Scheduling task');
         return helper.queue.scheduleTask(taskId);
       }).then(function(){
         return helper.receiver.listenFor(
           'taskRunning',
           helper.queueEvents.taskRunning({taskId: taskId}));
       }).then(function(){
-        debug("Claiming task");
+        debug('Claiming task');
         return helper.queue.claimTask(taskId, 0, {
-          workerGroup: "test-worker-group",
-          workerId: "test-worker-id"
+          workerGroup: 'test-worker-group',
+          workerId: 'test-worker-id'
         });
       }).then(function(){
         if (task_status === '0') {
@@ -98,29 +98,29 @@ suite("Integration test with passing and failing task", function() {
            expected artifact.
         */
         var artifactOptions = {
-          "storageType": "s3",
-          "expires": taskcluster.utils.fromNow("1 hour"),
-          "contentType": "application/json",
+          'storageType': 's3',
+          'expires': taskcluster.utils.fromNow('1 hour'),
+          'contentType': 'application/json',
         };
         return helper.queue.createArtifact(taskId, runID, testArtifactName, artifactOptions);
       }).then(function(queueResponse){
         // 2) We've received a response from the Queue, it should have a PUT URL in it.
-        debug("Creating artifact");
+        debug('Creating artifact');
         if (queueResponse.putUrl) {
           return request.put(queueResponse.putUrl)
               .set('Content-Type', 'application/json')
               .set("Content-Length", testArtifact.length)
               .send(testArtifact).end();
         } else {
-          throw new Error("Did not receive a putUrl from the Queue");
+          throw new Error('Did not receive a putUrl from the Queue');
         }
       })
       .then(function(){
         // 3) GET the artifact
         var artifactUrl = helper.queue.buildUrl(helper.queue.getArtifact, taskId, runID, testArtifactName);
         return request.get(artifactUrl).end().then(function(response) {
-          assert(response.statusCode === 200, "Expected statusCode 200");
-          assert(response.text === testArtifact, "Received artifact does not match expected.");
+          assert(response.statusCode === 200, 'Expected statusCode 200');
+          assert(response.text === testArtifact, 'Received artifact does not match expected.');
         });
       }).then(function () {
         if (task_status === '0') {
