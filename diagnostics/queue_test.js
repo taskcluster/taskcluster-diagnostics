@@ -1,31 +1,27 @@
 'use strict';
 
-suite("queue tests", function () {
+suite('Testing Queue', function () {
   var assert      = require('assert');
   var helper      = require('./helper')();
   var slugid      = require('slugid');
   var taskcluster = require('taskcluster-client');
   var debug       = require('debug')('queue:test');
 
-  test('can create task',function (done) {
+  if(!helper.cfg.taskcluster.credentials.accessToken){
+    debug("Skipping test due to missing credentials");
+    return;
+  }
+
+  test('can create task',function () {
     this.timeout(30*1000);
-    var taskId = slugid.v4();
-    var completedListener = new taskcluster.PulseListener({
-      credentials:  helper.cfg.pulse
-    });
+    let taskId = slugid.v4();
 
     helper.listener.bind(helper.queueEvents.taskDefined({ taskId }));
-    completedListener.bind(helper.queueEvents.taskCompleted({ taskId }));
 
     let receiveMessage = new Promise((resolve, reject) => {
       helper.listener.on('message', message => resolve(message.payload));
       helper.listener.on('error', reject);
     });
-
-    let completedTask = new Promise((resolve,reject) => {
-      completedListener.on('message',message => resolve(message.payload));
-      completedListener.on('error',reject);
-    })
 
     return helper.listener.resume().then(() => {
       let deadline = new Date();
@@ -58,7 +54,6 @@ suite("queue tests", function () {
     }).then(payload => {
       debug('Message payload: %s',JSON.stringify(payload));
       assert(payload.status.taskId === taskId, "Received wrong taskId");
-      done();
     });
   });
 });

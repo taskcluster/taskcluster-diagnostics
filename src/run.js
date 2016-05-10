@@ -9,18 +9,19 @@ const DIAGNOSTICS_ROOT = path.join(__dirname,'../diagnostics');
 
 var getPaths = () => {
   let queue = fs.readdirSync(DIAGNOSTICS_ROOT);
+  queue = queue.map(q => path.join(DIAGNOSTICS_ROOT,q));
   let files = [];
 
   while(queue.length > 0){
-    let p = path.join(DIAGNOSTICS_ROOT,_.head(queue));
+    let p = _.head(queue);
     let stat = fs.lstatSync(p);
 
     if (stat.isDirectory()) {
-      //console.log("DIR:",p);
-      _.concat(queue, fs.readdirSync(p));
+      let dir = fs.readdirSync(p)
+      queue =  _.concat(queue,dir.map(sub => p+'/'+sub));
     }else if (stat.isFile()) {
       //console.log("FILE:",p);
-      if (p.indexOf('_test.js') !== -1) {
+      if (p.indexOf('test.js') !== -1) {
         files.push(p);
       }
     }
@@ -37,7 +38,7 @@ var runDiagnostics = () => {
   });
   let files = getPaths();
   console.log("Tests: ");
-  
+
   files.map( file => {
     mocha.addFile(file);
     console.log(file);
