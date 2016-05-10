@@ -2,43 +2,63 @@
 
 suite("queue tests", function () {
   var assert      = require('assert');
-  var helper      = require('./helper').getHelper();
+  var helper      = require('./helper')();
   var slugid      = require('slugid');
   var taskcluster = require('taskcluster-client');
+  var debug       = require('debug')('queue:test');
 
-  it('should create dummy task',() => {
+  test('can create task',function (done) {
+    this.timeout(30*1000);
     var taskId = slugid.v4();
-    helper.listener.bind(helper.queueEvents.taskDefined({ taskId }));
-
-    let receiveMessage = new Promise((resolve, reject) => {
-      listener.on('message', message => resolve(message));
+    var completedListener = new taskcluster.PulseListener({
+      credentials:  helper.cfg.pulse
     });
 
-    helper.listener.resume().then(() => {
+    helper.listener.bind(helper.queueEvents.taskDefined({ taskId }));
+    completedListener.bind(helper.queueEvents.taskCompleted({ taskId }));
+
+    let receiveMessage = new Promise((resolve, reject) => {
+      helper.listener.on('message', message => resolve(message.payload));
+      helper.listener.on('error', reject);
+    });
+
+    let completedTask = new Promise((resolve,reject) => {
+      completedListener.on('message',message => resolve(message.payload));
+      completedListener.on('error',reject);
+    })
+
+    return helper.listener.resume().then(() => {
       let deadline = new Date();
       deadline.setHours(deadline.getHours() + 2);
       return helper.queue.defineTask(taskId,{
-        provisionerId:    "test-dummy-provisioner",
-        workerType:       "dummy-worker-type",
-        schedulerId:      "test-dummy-scheduler",
+        provisionerId:    "aws-provisioner-v1",
+        workerType:       "tutorial",
         created:          (new Date()).toJSON(),
         deadline:         deadline.toJSON(),
-        payload:          {},
+        payload:  {
+          image:          "ubuntu:13.10",
+          command:  [
+            "/bin/bash",
+            "-c",
+            "echo \"Hello World\""
+          ]
+        },
         metadata: {
-          name:           "Print `'Hello World'` Once",
+          name:           "Example Task",
           description:    "This task will prìnt `'Hello World'` **once**!",
-          owner:          "jojensen@mozilla.com",
-          source:         "https://github.com/taskcluster/taskcluster-events"
+          owner:          "chinmaykousik1@gmail.com",
+          source:         "https://github.com/ckousik/taskcluster-diagnostics"
         },
         tags: {
-          objective:      "Test taskcluster-event"
+          objective:      "taskcluster-diagnostics queue test"
         }
       });
-    }).then(result => {
-      assert(result.payload.status.taskId === taskId, "Got wrong task id");
+    }).then(() => {
       return receiveMessage;
-    }).then(message => {
-      console.log(message);
+    }).then(payload => {
+      debug('Message payload: %s',JSON.stringify(payload));
+      assert(payload.status.taskId === taskId, "Received wrong taskId");
+      done();
     });
   });
 });

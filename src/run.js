@@ -35,10 +35,18 @@ var runDiagnostics = () => {
     ui:       'tdd',
     reporter: 'spec'
   });
+  let files = getPaths();
+  console.log("Tests: ");
+  
+  files.map( file => {
+    mocha.addFile(file);
+    console.log(file);
+  });
 
-  getPaths().map( file => mocha.addFile(file) );
-
-  mocha.run();
+  mocha.run(failures => {
+    console.log("Failures: %d",failures);
+    process.exit(0);
+  });
 }
 
 runDiagnostics();

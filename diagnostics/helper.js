@@ -4,7 +4,7 @@ var taskcluster = require('taskcluster-client');
 var base        = require('taskcluster-base');
 
 var getHelper = profile => {
-  
+
   let helper = {};
 
   helper.cfg = base.config({ profile });
@@ -22,4 +22,4 @@ var getHelper = profile => {
   return helper;
 }
 
-module.exports = getHelper();
+module.exports = getHelper;
