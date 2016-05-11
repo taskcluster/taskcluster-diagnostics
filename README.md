@@ -1,6 +1,8 @@
 TaskCluster Diagnostics
 =======================
 
+[![Build Status](https://travis-ci.org/ckousik/taskcluster-diagnostics.svg?branch=master)](https://travis-ci.org/ckousik/taskcluster-diagnostics)
+
 The taskcluster diagnotics component runs tests against the production
 deployment of taskcluster. This is intend to quickly notify us if for some
 reason the production deployment breaks. This can happen both when we deploy
