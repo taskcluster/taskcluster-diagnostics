@@ -5,6 +5,7 @@ defaults:
   trustProxy:         false
   events:
     statsComponent:   events
+  env:                !env ENV
 
   pulse:
     username:         !env PULSE_USERNAME

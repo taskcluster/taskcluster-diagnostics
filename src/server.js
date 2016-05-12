@@ -1,10 +1,14 @@
 'use strict';
-var runTests = require('./run');
+var base      = require('taskcluster-base');
+var runTests  = require('./run');
+var helper    = require('../diagnostics/helper')();
 
-runTests().then((output) => {
-  console.log(output);
-  process.exit(0);
-}).catch((output) => {
-  console.log(output);
-  process.exit(0);
+
+var app = base.app({
+  port:       helper.cfg.port,
+  forceSSL:   helper.cfg.forceSSL,
+  trustProxy: helper.cfg.trustProxy,
+  env:        helper.cfg.env
 });
+
+runTests();

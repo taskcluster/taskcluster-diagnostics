@@ -15,18 +15,9 @@ describe('Testing Queue', function () {
   it('can create task',function (done) {
     this.timeout(30*1000);
     let taskId = slugid.v4();
-
-    helper.listener.bind(helper.queueEvents.taskDefined({ taskId }));
-
-    let receiveMessage = new Promise((resolve, reject) => {
-      helper.listener.on('message', message => resolve(message.payload));
-      helper.listener.on('error', reject);
-    });
-
-    return helper.listener.resume().then(() => {
-      let deadline = new Date();
-      deadline.setHours(deadline.getHours() + 2);
-      return helper.queue.defineTask(taskId,{
+    let deadline = new Date();
+    deadline.setHours(deadline.getHours() + 2);
+    return helper.queue.createTask(taskId,{
         provisionerId:    "aws-provisioner-v1",
         workerType:       "tutorial",
         created:          (new Date()).toJSON(),
@@ -48,13 +39,12 @@ describe('Testing Queue', function () {
         tags: {
           objective:      "taskcluster-diagnostics queue test"
         }
-      });
-    }).then(() => {
-      return receiveMessage;
-    }).then(payload => {
+      }).then(payload => {
       debug('Message payload: %s',JSON.stringify(payload));
       assert(payload.status.taskId === taskId, "Received wrong taskId");
       return done();
     });
   });
+
+  return;
 });

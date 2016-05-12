@@ -3,6 +3,8 @@
 var Mocha   = require('mocha');
 var path    = require('path');
 var fs      = require('fs');
+var base    = require('taskcluster-base');
+var helper  = require('../diagnostics/helper')();
 var Promise = require('bluebird');
 var _       = require('lodash');
 
@@ -43,8 +45,13 @@ var runTests = () => {
   getPaths().map(file => mocha.addFile(file) );
 
   return new Promise(function(resolve, reject) {
+
     mocha.run(failures => {
+
+      base.app.notifyLocalAppInParentProcess(helper.cfg.port);
+
       return (!failures ? resolve : reject)(output);
+
     }).on('pass', test => output[ test.title ] = 'P')
     .on('fail', test => output[ test.title ] = 'F');
   });

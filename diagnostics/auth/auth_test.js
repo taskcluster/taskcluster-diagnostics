@@ -74,4 +74,6 @@ describe('Testing Auth', function () {
       return done();
     });
   });
+
+  return;
 });
