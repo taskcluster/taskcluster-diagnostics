@@ -19,6 +19,35 @@ var getHelper = profile => {
     credentials: helper.cfg.pulse
   });
 
+  helper.simpleTaskDef = taskId => {
+    let deadline = new Date();
+    deadline.setHours(deadline.getHours() + 2);
+    
+    return {
+      provisionerId:    "aws-provisioner-v1",
+      workerType:       "tutorial",
+      created:          (new Date()).toJSON(),
+      deadline:         deadline.toJSON(),
+      payload:  {
+        image:          "ubuntu:13.10",
+        command:  [
+          "/bin/bash",
+          "-c",
+          "echo \"Hello World\""
+        ]
+      },
+      metadata: {
+        name:           "Example Task",
+        description:    "This task will prìnt `'Hello World'` **once**!",
+        owner:          "chinmaykousik1@gmail.com",
+        source:         "https://github.com/ckousik/taskcluster-diagnostics"
+      },
+      tags: {
+        objective:      "taskcluster-diagnostics queue test"
+      }
+    };
+  }
+
   return helper;
 }
 

@@ -12,39 +12,38 @@ describe('Testing Queue', function () {
     return;
   }
 
-  it('can create task',function (done) {
+  it('can define task',function (done) {
     this.timeout(30*1000);
     let taskId = slugid.v4();
-    let deadline = new Date();
-    deadline.setHours(deadline.getHours() + 2);
-    return helper.queue.createTask(taskId,{
-        provisionerId:    "aws-provisioner-v1",
-        workerType:       "tutorial",
-        created:          (new Date()).toJSON(),
-        deadline:         deadline.toJSON(),
-        payload:  {
-          image:          "ubuntu:13.10",
-          command:  [
-            "/bin/bash",
-            "-c",
-            "echo \"Hello World\""
-          ]
-        },
-        metadata: {
-          name:           "Example Task",
-          description:    "This task will prìnt `'Hello World'` **once**!",
-          owner:          "chinmaykousik1@gmail.com",
-          source:         "https://github.com/ckousik/taskcluster-diagnostics"
-        },
-        tags: {
-          objective:      "taskcluster-diagnostics queue test"
-        }
-      }).then(payload => {
+
+    let getMessage = new Promise((resolve, reject) => {
+      return helper.listener.on('message', message => {
+        return resolve(message.payload);
+      }).on('error', error => {
+        throw new Error("Error defining task");
+      });
+    });
+
+    helper.listener.bind(helper.queueEvents.taskDefined({ taskId }));
+    return helper.listener.resume().then(() => {
+
+      debug("Task defined with taskId %s", taskId);
+      return helper.queue.defineTask(taskId,helper.simpleTaskDef(taskId));
+
+    }).then(() => {
+      return getMessage;
+
+    }).then(payload => {
+
       debug('Message payload: %s',JSON.stringify(payload));
       assert(payload.status.taskId === taskId, "Received wrong taskId");
       return done();
+
     });
+
   });
 
-  return;
+  after(function () {
+    helper.listener.close();
+  })
 });
