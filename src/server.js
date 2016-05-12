@@ -1,11 +1,10 @@
 'use strict';
-const TestRunner = require('./TestRunner');
+var runTests = require('./run');
 
-var runTests = () => {
-  let testRunner = new TestRunner();
-  return testRunner.run().then(output => {
-    console.log(output);
-  });
-}
-
-runTests();
+runTests().then((output) => {
+  console.log(output);
+  process.exit(0);
+}).catch((output) => {
+  console.log(output);
+  process.exit(0);
+});

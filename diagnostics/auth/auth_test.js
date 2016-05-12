@@ -1,5 +1,5 @@
 'use strict';
-suite('Testing Auth', function () {
+describe('Testing Auth', function () {
   var taskcluster = require('taskcluster-client');
   var hawk        = require('hawk');
   var helper      = require('../helper')();
@@ -17,16 +17,17 @@ suite('Testing Auth', function () {
     credentials:  helper.cfg.taskcluster.credentials
   });
 
-  test('can get client', function () {
+  it('can get client', function (done) {
     this.timeout(20*1000);
     let clientId = helper.cfg.taskcluster.credentials.clientId;
     return auth.client(clientId).then(client => {
       debug("Client: %s",JSON.stringify(client));
       assert(client.clientId === clientId);
+      return done();
     });
   });
 
-  test('can create and delete client',function () {
+  it('can create and delete client',function (done) {
     this.timeout(20*1000);
     let clientId = helper.cfg.taskcluster.baseClientId+slugid.nice();
     let expires = new Date();
@@ -37,11 +38,13 @@ suite('Testing Auth', function () {
       description: "delete me"
     }).then(client => {
       assert(client.clientId === clientId);
-      return auth.deleteClient(clientId);
+      return auth.deleteClient(clientId).then(() => {
+        return done();
+      })
     });
   })
 
-  test('can answer authenticateHawk requests', function () {
+  it('can answer authenticateHawk requests', function (done) {
     let credentials = helper.cfg.taskcluster.credentials;
     this.timeout(30*1000);
 
@@ -68,6 +71,7 @@ suite('Testing Auth', function () {
       debug("Result: %s",JSON.stringify(result));
       assert(result.status === 'auth-success',"Auth failed");
       assert(result.hash === 'XtNvx1FqrUYVOLlne3l2WzcyRfj9QeC6YtmhMKKFMGY=', "Wrong hash");
+      return done();
     });
   });
 });

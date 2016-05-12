@@ -1,6 +1,6 @@
 'use strict';
 
-suite('Testing Queue', function () {
+describe('Testing Queue', function () {
   var assert      = require('assert');
   var helper      = require('./helper')();
   var slugid      = require('slugid');
@@ -12,7 +12,7 @@ suite('Testing Queue', function () {
     return;
   }
 
-  test('can create task',function () {
+  it('can create task',function (done) {
     this.timeout(30*1000);
     let taskId = slugid.v4();
 
@@ -54,6 +54,7 @@ suite('Testing Queue', function () {
     }).then(payload => {
       debug('Message payload: %s',JSON.stringify(payload));
       assert(payload.status.taskId === taskId, "Received wrong taskId");
+      return done();
     });
   });
 });
