@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node build/server.js",
+    "test": "npm run compile && node build/server.js",
     "compile": "babel src --out-dir build"
   },
   "repository": {
