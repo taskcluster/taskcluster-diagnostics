@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "node src/server.js"
+    "test": "node build/server.js",
+    "compile": "babel src --out-dir build"
   },
   "repository": {
     "type": "git",
@@ -25,5 +26,9 @@
     "slugid": "^1.1.0",
     "taskcluster-base": "^0.13.0",
     "taskcluster-client": "^0.23.17"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.8.0",
+    "babel-preset-stage-1": "^6.5.0"
   }
 }

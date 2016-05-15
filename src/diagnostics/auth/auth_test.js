@@ -17,34 +17,32 @@ describe('Testing Auth', function () {
     credentials:  helper.cfg.taskcluster.credentials
   });
 
-  it('can get client', function (done) {
+  it('can get client', async function (done) {
     this.timeout(20*1000);
     let clientId = helper.cfg.taskcluster.credentials.clientId;
-    return auth.client(clientId).then(client => {
-      debug("Client: %s",JSON.stringify(client));
-      assert(client.clientId === clientId);
-      return done();
-    });
+    let client = await auth.client(clientId);
+    debug("Client: %s",JSON.stringify(client));
+    assert(client.clientId === clientId);
+    return done();
   });
 
-  it('can create and delete client',function (done) {
+  it('can create and delete client', async function (done) {
     this.timeout(20*1000);
     let clientId = helper.cfg.taskcluster.baseClientId+slugid.nice();
     let expires = new Date();
     expires.setMinutes(expires.getMinutes() + 2);
     expires = expires.toJSON();
-    return auth.createClient(clientId,{
+    auth.createClient(clientId,{
       expires,
       description: "delete me"
-    }).then(client => {
+    }).then(async (client) => {
       assert(client.clientId === clientId);
-      return auth.deleteClient(clientId).then(() => {
-        return done();
-      })
-    });
-  })
+      await auth.deleteClient(clientId);
+      return done();
+    })
+  });
 
-  it('can answer authenticateHawk requests', function (done) {
+  it('can answer authenticateHawk requests', async function (done) {
     let credentials = helper.cfg.taskcluster.credentials;
     this.timeout(30*1000);
 
@@ -67,12 +65,11 @@ describe('Testing Auth', function () {
           payload: '{}'
         }).field;
 
-    return auth.authenticateHawk(data).then(result => {
-      debug("Result: %s",JSON.stringify(result));
-      assert(result.status === 'auth-success',"Auth failed");
-      assert(result.hash === 'XtNvx1FqrUYVOLlne3l2WzcyRfj9QeC6YtmhMKKFMGY=', "Wrong hash");
-      return done();
-    });
+    let result = await auth.authenticateHawk(data)
+    debug("Result: %s",JSON.stringify(result));
+    assert(result.status === 'auth-success',"Auth failed");
+    assert(result.hash === 'XtNvx1FqrUYVOLlne3l2WzcyRfj9QeC6YtmhMKKFMGY=', "Wrong hash");
+    return done();
   });
 
   return;

@@ -1,7 +1,7 @@
 'use strict';
 var base      = require('taskcluster-base');
 var runTests  = require('./run');
-var helper    = require('../diagnostics/helper')();
+var helper    = require('./diagnostics/helper')();
 
 
 var app = base.app({

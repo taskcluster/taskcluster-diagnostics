@@ -4,11 +4,11 @@ var Mocha   = require('mocha');
 var path    = require('path');
 var fs      = require('fs');
 var base    = require('taskcluster-base');
-var helper  = require('../diagnostics/helper')();
+var helper  = require('./diagnostics/helper')();
 var Promise = require('bluebird');
 var _       = require('lodash');
 
-const DIAGNOSTICS_ROOT = path.join(__dirname,'../diagnostics');
+const DIAGNOSTICS_ROOT = path.join(__dirname,'diagnostics');
 
 var getPaths = path_to_diagnostics => {
 
