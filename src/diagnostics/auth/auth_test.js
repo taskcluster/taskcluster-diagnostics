@@ -1,8 +1,8 @@
 'use strict';
-describe('Testing Auth', function () {
+describe('Auth', function () {
   var taskcluster = require('taskcluster-client');
   var hawk        = require('hawk');
-  var helper      = require('../helper')();
+  var helper      = require('../helper');
   var assert      = require('assert');
   var debug       = require('debug')('auth:test');
   var slugid      = require('slugid');

@@ -1,8 +1,8 @@
 'use strict';
 
-describe('Testing Queue', function () {
+describe('Queue', function () {
   var assert      = require('assert');
-  var helper      = require('./helper')();
+  var helper      = require('./helper');
   var slugid      = require('slugid');
   var taskcluster = require('taskcluster-client');
   var debug       = require('debug')('queue:test');

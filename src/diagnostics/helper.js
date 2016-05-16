@@ -1,4 +1,3 @@
-'use strict';
 
 var taskcluster = require('taskcluster-client');
 var base        = require('taskcluster-base');
@@ -22,7 +21,7 @@ var getHelper = profile => {
   helper.simpleTaskDef = taskId => {
     let deadline = new Date();
     deadline.setHours(deadline.getHours() + 2);
-    
+
     return {
       provisionerId:    "aws-provisioner-v1",
       workerType:       "tutorial",
@@ -51,4 +50,4 @@ var getHelper = profile => {
   return helper;
 }
 
-module.exports = getHelper;
+module.exports = getHelper();

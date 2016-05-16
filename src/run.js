@@ -1,12 +1,11 @@
 'use strict';
 
-var Mocha   = require('mocha');
-var path    = require('path');
-var fs      = require('fs');
-var base    = require('taskcluster-base');
-var helper  = require('./diagnostics/helper')();
-var Promise = require('bluebird');
-var _       = require('lodash');
+import Mocha from 'mocha';
+import path from 'path';
+import fs from 'fs';
+import base from 'taskcluster-base';
+import helper from './diagnostics/helper';
+import _ from 'lodash';
 
 const DIAGNOSTICS_ROOT = path.join(__dirname,'diagnostics');
 
@@ -45,15 +44,24 @@ var runTests = () => {
   getPaths().map(file => mocha.addFile(file) );
 
   return new Promise(function(resolve, reject) {
+    let suite_stack = [];
+
+    let setResult = (test, result) => {
+      output [ _.concat(suite_stack, test.title).join('/') ] = result;
+    }
 
     mocha.run(failures => {
-
       base.app.notifyLocalAppInParentProcess(helper.cfg.port);
-
       return (!failures ? resolve : reject)(output);
-
-    }).on('pass', test => output[ test.title ] = 'P')
-    .on('fail', test => output[ test.title ] = 'F');
+    })
+    .on('suite', suite => {
+      suite_stack.push(suite.title);
+    })
+    .on('suite end', suite => {
+      suite_stack = _.dropRight(suite_stack);
+    })
+    .on('pass', test => setResult(test,'Passed'))
+    .on('fail', test => setResult(test,'Failed'));
   });
 }
 
