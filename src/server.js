@@ -11,4 +11,7 @@ var app = base.app({
   env:        helper.cfg.env
 });
 
-runTests();
+(async function run() {
+  let result = await runTests();
+  console.log(result);
+}).call(this)
