@@ -39,29 +39,30 @@ var getPaths = path_to_diagnostics => {
 
 
 var runTests = () => {
-  let mocha = new Mocha();
-  let output = {};
-  getPaths().map(file => mocha.addFile(file) );
-
   return new Promise(function(resolve, reject) {
+    let mocha = new Mocha();
+    let output = {};
+    getPaths().map(file => mocha.addFile(file) );
     let suite_stack = [];
-
+    output.passing = [];
+    output.failing = [];
     let setResult = (test, result) => {
-      output [ _.concat(suite_stack, test.title).join('/') ] = result;
+      output[result].push( _.concat(suite_stack, test.title).join('/'))
     }
-
-    mocha.run(failures => {
-      base.app.notifyLocalAppInParentProcess(helper.cfg.port);
-      return (!failures ? resolve : reject)(output);
-    })
+    let runner = mocha.run()
     .on('suite', suite => {
       suite_stack.push(suite.title);
     })
     .on('suite end', suite => {
       suite_stack = _.dropRight(suite_stack);
     })
-    .on('pass', test => setResult(test,'Passed'))
-    .on('fail', test => setResult(test,'Failed'));
+    .on('pass', test => setResult(test,'passing'))
+    .on('fail', test => setResult(test,'failing'))
+    .on('end', () => {
+      runner.abort()
+      base.app.notifyLocalAppInParentProcess(helper.cfg.port);
+      return resolve(output);
+    });
   });
 }
 

@@ -2,8 +2,12 @@ require('babel-core/register');
 require('babel-polyfill');
 
 import runTests from './run';
+import parse from './reporter';
 
-(async function run() {
-  let result = await runTests();
-  console.log(result);
-})();
+var run = async () => {
+  let raw = await runTests();
+  console.log(parse(raw));
+  return;
+}
+
+run();
