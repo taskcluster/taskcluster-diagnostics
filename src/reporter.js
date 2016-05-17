@@ -1,6 +1,5 @@
-import _ from 'lodash';
-import assert from 'assert';
-
+'use strict';
+var _ = require('lodash');
 var debug = require('debug')('diagnostics:reporter');
 
 var parse = result => {

@@ -1,13 +1,3 @@
-require('babel-core/register');
-require('babel-polyfill');
+var TestRunner = require('./TestRunner');
 
-import runTests from './run';
-import parse from './reporter';
-
-var run = async () => {
-  let raw = await runTests();
-  console.log(parse(raw));
-  return;
-}
-
-run();
+(new TestRunner()).runAndGetResults().then(console.log);

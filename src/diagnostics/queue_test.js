@@ -12,7 +12,7 @@ describe('Queue', function () {
     return;
   }
 
-  it("can define task", async function (done) {
+  it("can define task", function (done) {
     this.timeout(30*1000);
     let taskId = slugid.v4();
 
@@ -25,10 +25,12 @@ describe('Queue', function () {
       });
 
     helper.listener.bind(helper.queueEvents.taskDefined({ taskId }));
-    await helper.listener.resume();
-    await helper.queue.defineTask(taskId,helper.simpleTaskDef(taskId));
-    debug("Task defined with taskId %s", taskId);
-    return getMessage.then(payload =>{
+    helper.listener.resume().then(()=>{
+      debug("Task defined with taskId %s", taskId);
+      return helper.queue.defineTask(taskId,helper.simpleTaskDef(taskId));
+    }).then(() => {
+      return getMessage;
+    }).then(payload => {
       debug('Message payload: %s',JSON.stringify(payload));
       assert(payload.status.taskId === taskId, "Received wrong taskId");
       return done();

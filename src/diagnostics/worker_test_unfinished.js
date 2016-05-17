@@ -1,11 +1,11 @@
 'use strict';
-suite('Testing worker', function () {
+describe('Worker', function () {
   var taskcluster = require('taskcluster-client');
-  var helper      = require('../helper')();
+  var helper      = require('./helper');
   var slugid      = require('slugid');
 
   it("should create and complete a task", function (done) {
-
+    this.timeout(60*1000);
     let taskId = slugid.nice();
     let promise = {};
 
@@ -21,6 +21,7 @@ suite('Testing worker', function () {
       promise[exch] = new Promise((resolve, reject) => {
         helper.listener.on('message', message => {
           if(message.exchange === helper.queueEvents[exch]().exchange){
+            debug(exch,': ',message.payload);
             return resolve(message.payload);
           }
         }).on('error', () => {

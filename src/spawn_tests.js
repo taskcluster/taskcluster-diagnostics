@@ -1,6 +1,8 @@
-import { spawn } from 'child_process'
-import {StringDecoder} from 'string_decoder'
-import path from 'path'
+'use strict';
+
+var spawn = require('child_process').spawn;
+var StringDecoder = require('string_decoder').StringDecoder;
+var path = require('path');
 
 var spawnTests = () => {
   var s = spawn('node',['build/test_server.js'],{

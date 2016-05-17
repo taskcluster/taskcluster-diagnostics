@@ -1,4 +1,4 @@
-
+'use strict';
 var taskcluster = require('taskcluster-client');
 var base        = require('taskcluster-base');
 
