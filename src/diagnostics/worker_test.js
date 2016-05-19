@@ -6,28 +6,26 @@ describe('Worker', function () {
   var debug       = require('debug')('worker:test');
 
   it("should create and complete a task", function (done) {
-    this.timeout(60*1000);
+    this.timeout(120*1000);
     let taskId = slugid.nice();
     let promise = {};
-
+    let runId, workerId, workerGroup;
+    debug("TaskId", taskId);
     ['taskDefined',
     'taskPending',
     'taskRunning',
-    'taskCompleted',
-    'artifactCreated',
     'taskCompleted'].forEach(exch => {
       let r = helper.queueEvents[exch]({ taskId });
       helper.listener.bind(r);
-
       promise[exch] = new Promise((resolve, reject) => {
-        helper.listener.on('message', message => {
-          if(message.exchange === helper.queueEvents[exch]().exchange){
-            console.log(message.exchange);
-            console.log(exch,': ',message.payload);
-            return resolve(message.payload);
+        return helper.listener.on('message', message => {
+          if(message.exchange === r.exchange){
+            if(exch === 'taskCompleted'){
+              done();
+            }
+            debug(message.exchange);
+            return resolve(message);
           }
-        }).on('error', () => {
-          throw new Error("Error at: "+exch);
         });
       });
     });
@@ -40,10 +38,12 @@ describe('Worker', function () {
       return helper.queue.scheduleTask(taskId);
     }).then(() => {
       return promise.taskPending;
-    }).then(() => {
-      return helper.queue.claimTask(taskId, {
-        //workers
-      });
+    }).then(pendingResult => {
+      let runs = pendingResult.status.runs;
+      runId = runs[0].runId;
+      workerId = runs[0].workerId;
+      workerGroup = runs[0].workerGroup;
+      return helper.queue.claimTask(taskId, runId, { workerId, workerGroup });
     }).then(() => {
       return promise.taskRunning;
     }).then(() => {

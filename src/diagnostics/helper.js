@@ -27,13 +27,15 @@ var getHelper = profile => {
       workerType:       "tutorial",
       created:          (new Date()).toJSON(),
       deadline:         deadline.toJSON(),
+      schedulerId:      'tc-diagnostics',
       payload:  {
         image:          "ubuntu:13.10",
         command:  [
           "/bin/bash",
           "-c",
           "echo \"Hello World\""
-        ]
+        ],
+        maxRunTime: 600
       },
       metadata: {
         name:           "Example Task",
