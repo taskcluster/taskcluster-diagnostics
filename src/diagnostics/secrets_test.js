@@ -15,22 +15,6 @@ describe("Secrets", function () {
     secret:   { data },
     expires:  taskcluster.fromNowJSON('- 2 hours')
   };
-  let secrets = taskcluster.Secrets({
-    credentials: helper.cfg.taskcluster.credentials;
-  });
 
-  let testCases = [
-    {
-      testName: "write secret with allowed key",
-      method:   "set",
-      name:     "garbage:"+key1,
-      payload:  payloadExpires
-    },
-    {
-      testName: "write secret with disallowed key",
-      method:   "set",
-      name:     "not-garbage:"+key2,
-      payload:  payloadExpires
-    }
-  ]
+  
 });

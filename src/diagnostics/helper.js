@@ -18,6 +18,14 @@ var getHelper = profile => {
     credentials: helper.cfg.pulse
   });
 
+  helper.secrets = new taskcluster.Secrets({
+    credentials: helper.cfg.taskcluster.credentials
+  })
+
+  helper.index = new taskcluster.Index({
+    credentials: helper.cfg.taskcluster.credentials
+  });
+
   helper.simpleTaskDef = taskId => {
     let deadline = new Date();
     deadline.setHours(deadline.getHours() + 2);
