@@ -81,4 +81,34 @@ describe("Secrets", function () {
     });
   });
 
+  it('should delete secret', function (done) {
+    this.timeout(60*1000);
+    return helper.secrets.set("garbage/"+key1, payloadExpires)
+    .then(() => {
+      return helper.secrets.remove("garbage/"+key1);
+    }).then(() => {
+      return helper.secrets.get("garbage/"+key1);
+    }).catch(err => {
+      debug("Status code: ",err.statusCode);
+      assert(err.statusCode === 404, "Wrong status code");
+      done();
+    }).then(() => {
+      throw Error("Secret should be deleted");
+    });
+  });
+
+  it('should fail when reading an expired secret', function (done) {
+    this.timeout(30*1000);
+    return helper.secrets.set("garbage/"+key2, payloadExpired)
+    .then(() => {
+      return helper.secrets.get("garbage/"+key2);
+    }).catch(err => {
+      debug("Error statusCode", err.statusCode);
+      assert(err.statusCode === 410);
+      done();
+    }).then(() => {
+      throw new Error("Secret should not be retreivable");
+    });
+  })
+
 });
