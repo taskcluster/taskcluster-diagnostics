@@ -28,15 +28,21 @@ describe('Auth', function () {
   });
 
   it('can create and delete client', function (done) {
-    this.timeout(20*1000);
-    let clientId = helper.cfg.taskcluster.baseClientId+slugid.nice();
+    this.timeout(30*1000);
+    let clientId = helper.cfg.taskcluster.credentials.clientId+'/'+slugid.nice();
     let expires = new Date();
     expires.setMinutes(expires.getMinutes() + 2);
     expires = expires.toJSON();
-    auth.createClient(clientId,{
+    debug("Creating client");
+    return auth.createClient(clientId,{
       expires,
       description: "delete me"
-    }).then(client => {
+    })
+    .catch(err => {
+      throw err;
+    })
+    .then(client => {
+      debug(client);
       assert(client.clientId === clientId);
       auth.deleteClient(clientId).then(() => {
         return done();

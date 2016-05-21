@@ -24,9 +24,6 @@ Create a file `user-config.yml`
 ```yaml
 defaults:
   taskcluster:
-    # if clientId is persona/chinmaykousik1@gmail.com/tc-diagnostics, then
-    # baseclientId will be persona/chinmaykousik1@gmail.com/
-    baseClientId:   base_clientId
     credentials:
       clientId:     taskcluster_clientId
       accessToken:  taskcluster_accessToken

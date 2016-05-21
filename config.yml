@@ -12,9 +12,6 @@ defaults:
     password:         !env PULSE_PASSWORD
 
   taskcluster:
-    # if clientId is persona/chinmaykousik1@gmail.com/tc-diagnostics, then
-    # baseclientId will be persona/chinmaykousik1@gmail.com/
-    baseClientId:     !env TASKCLUSTER_BASE_CLIENT_ID
     credentials:
       accessToken:    !env TASKCLUSTER_ACCESS_TOKEN
       clientId:       !env TASKCLUSTER_CLIENT_ID
