@@ -1,3 +1,11 @@
-var TestRunner = require('./TestRunner');
+'use strict';
+var TestRunner =  require('./TestRunner');
+var Reporter   =  require('./Reporter');
 
-(new TestRunner()).runAndGetResults().then(console.log);
+var run = () => {
+  let tr = new TestRunner();
+  let reporter = new Reporter();
+  tr.runTests().then(console.log);
+}
+
+run();

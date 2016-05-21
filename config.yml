@@ -15,3 +15,10 @@ defaults:
     credentials:
       accessToken:    !env TASKCLUSTER_ACCESS_TOKEN
       clientId:       !env TASKCLUSTER_CLIENT_ID
+
+  aws:
+    region:           !env AWS_REGION
+    bucket:           !env AWS_BUCKET
+    credentials:
+      accessKeyId:      !env AWS_ACCESS_KEY_ID
+      secretAccessKey:  !env AWS_SECRET_ACCESS_KEY

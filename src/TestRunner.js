@@ -8,8 +8,6 @@ var helper = require('./diagnostics/helper');
 var Promise = require('bluebird');
 var _ = require('lodash');
 
-var parse = require('./reporter');
-
 const DIAGNOSTICS_ROOT = path.join(__dirname,'diagnostics');
 
 class TestRunner {
@@ -47,7 +45,7 @@ class TestRunner {
     return files;
   }
 
-  _runTests () {
+  runTests () {
     let result = {};
     let suite_stack = [];
     result.passing = [];
@@ -72,12 +70,6 @@ class TestRunner {
         return resolve(result);
       });
     });
-  }
-
-  runAndGetResults () {
-    return this._runTests().then(result => {
-      return Promise.resolve(parse(result));
-    })
   }
 
 }
