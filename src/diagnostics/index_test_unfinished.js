@@ -13,13 +13,13 @@ describe('Index', function () {
 
   it('should find top level namespaces', function(done) {
     this.timeout(30*1000);
-    helper.index.listNamespaces('',{}).then(result => {
+    return helper.index.listNamespaces('',{}).then(result => {
       debug("Top-level namespaces: ");
       result.namespaces.map(ns => {
         debug(ns.namespace);
         assert(ns.namespace.indexOf('.') === -1, "Shouldn't have any dots");
       });
       done();
-    });
+    }).catch(debug);
   });
 });

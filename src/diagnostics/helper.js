@@ -57,6 +57,40 @@ var getHelper = profile => {
     };
   }
 
+  helper.exitTaskDefEnvVars = (taskId,status) => {
+    let deadline = new Date();
+    deadline.setHours(deadline.getHours() + 2);
+
+    return {
+      provisionerId:    "aws-provisioner-v1",
+      workerType:       "tutorial",
+      created:          (new Date()).toJSON(),
+      deadline:         deadline.toJSON(),
+      schedulerId:      'tc-diagnostics',
+      payload:  {
+        image:          "ubuntu:13.10",
+        command:  [
+          "/bin/bash",
+          "-c",
+          "exit $MY_ENV_VAR"
+        ],
+        env: {
+          MY_ENV_VAR: status
+        },
+        maxRunTime: 600
+      },
+      metadata: {
+        name:           "Example Task",
+        description:    "This task will prìnt `'Hello World'` **once**!",
+        owner:          "chinmaykousik1@gmail.com",
+        source:         "https://github.com/ckousik/taskcluster-diagnostics"
+      },
+      tags: {
+        objective:      "taskcluster-diagnostics queue test"
+      }
+    };
+  }
+
   return helper;
 }
 
