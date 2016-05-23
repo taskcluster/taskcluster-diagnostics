@@ -29,6 +29,7 @@ class Reporter {
 
   upload (result) {
     let Key = this.makeResultString(result);
+    debug("Uploading object:", Key);
     return new Promise((resolve, reject) => {
       return this.s3.putObject({ Key , Body: JSON.stringify(result)}, (err, data) => {
         if(err){

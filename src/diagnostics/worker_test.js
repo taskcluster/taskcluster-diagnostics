@@ -30,7 +30,7 @@ describe('Worker', function () {
       });
     });
 
-    helper.listener.resume().then(() => {
+    return helper.listener.resume().then(() => {
       return helper.queue.defineTask(taskId, helper.simpleTaskDef(taskId));
     }).then(() => {
       return promise.taskDefined;
@@ -39,16 +39,15 @@ describe('Worker', function () {
     }).then(() => {
       return promise.taskPending;
     }).then(pendingResult => {
-      let runs = pendingResult.status.runs;
-      runId = runs[0].runId;
-      workerId = runs[0].workerId;
-      workerGroup = runs[0].workerGroup;
-      return helper.queue.claimTask(taskId, runId, { workerId, workerGroup });
+      return helper.queue.claimTask(taskId, 0, {
+        workerGroup: 'dummy-test-workergroup',
+        workerId: 'dummy-test-worker-id'
+      });
     }).then(() => {
       return promise.taskRunning;
     }).then(() => {
       return promise.taskCompleted;
-    });
+    }).then(done);
   });
 
   after(function () {

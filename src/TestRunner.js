@@ -6,6 +6,7 @@ var base = require('taskcluster-base');
 var fs = require('fs');
 var helper = require('./diagnostics/helper');
 var Promise = require('bluebird');
+var debug = require('debug')('diagnostics:runner');
 var _ = require('lodash');
 
 const DIAGNOSTICS_ROOT = path.join(__dirname,'diagnostics');
@@ -14,7 +15,7 @@ class TestRunner {
   constructor (path_to_diagnostics) {
     this.files = this._getPaths(path_to_diagnostics);
     this.mocha = new Mocha({ ui :'bdd'});
-    console.log("TESTS:",this.files);
+    debug("TESTS:",this.files);
     this.files.map(file => this.mocha.addFile(file));
   }
 
