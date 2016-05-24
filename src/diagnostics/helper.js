@@ -18,6 +18,12 @@ var getHelper = profile => {
     credentials: helper.cfg.pulse
   });
 
+  helper.createNewListener = () => {
+    return new taskcluster.PulseListener({
+      credentials: helper.cfg.pulse
+    })
+  }
+
   helper.secrets = new taskcluster.Secrets({
     credentials: helper.cfg.taskcluster.credentials
   })
