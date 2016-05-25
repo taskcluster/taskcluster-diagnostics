@@ -13,8 +13,9 @@ describe('Queue', function () {
   }
 
   it("can define task", function (done) {
-    this.timeout(30*1000);
+    this.timeout(60*1000);
     let taskId = slugid.v4();
+    let testDef = helper.simpleTaskDef(taskId);
 
     let getMessage = new Promise((resolve, reject) => {
         return helper.listener.on('message', message => {
@@ -25,16 +26,26 @@ describe('Queue', function () {
       });
 
     helper.listener.bind(helper.queueEvents.taskDefined({ taskId }));
-    helper.listener.resume().then(()=>{
+    return helper.listener.resume().then(()=>{
       debug("Task defined with taskId %s", taskId);
-      return helper.queue.defineTask(taskId,helper.simpleTaskDef(taskId));
+      return helper.queue.defineTask(taskId,testDef);
     }).then(() => {
       return getMessage;
     }).then(payload => {
       debug('Message payload: %s',JSON.stringify(payload));
       assert(payload.status.taskId === taskId, "Received wrong taskId");
-      return done();
-    });
+    }).then(() => {
+      /*
+      We use queue.task() to check if the task exists
+      */
+      return helper.queue.task(taskId);
+    }).then( response => {
+      assert(response.created === testDef.created, "Wrong task");
+      assert(response.schedulerId === testDef.schedulerId, "Wrong schedulerId");
+      assert.deepEqual(response.metadata, testDef.metadata);
+
+      done();
+    }).catch(done);
   });
 
   after(function () {

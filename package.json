@@ -11,7 +11,7 @@
     "url": "git+https://github.com/ckousik/taskcluster-diagnostics.git"
   },
   "author": "Chinmay Kousik",
-  "license": "ISC",
+  "license": "MPL",
   "bugs": {
     "url": "https://github.com/ckousik/taskcluster-diagnostics/issues"
   },
@@ -29,5 +29,8 @@
     "superagent-promise": "^1.1.0",
     "taskcluster-base": "^0.13.0",
     "taskcluster-client": "^0.23.17"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.9.0"
   }
 }
