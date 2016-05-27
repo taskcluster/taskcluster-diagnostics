@@ -17,7 +17,6 @@ class TestSpawn {
     this.reporter = new LogReporter();
     this.decoder = new StringDecoder('utf8');
     this._spawnTests = this._spawnTests.bind(this);
-    this.run = this.run.bind(this);
   }
 
   _spawnTests () {
@@ -54,13 +53,6 @@ class TestSpawn {
     });
   }
 
-  run (interval){
-    interval = interval || 6*60*60*1000; // 6 hours
-    this._spawnTests();
-    this.runInterval = setInterval(function () {
-      this._spawnTests();
-    }, interval);
-  }
 }
 
-(new TestSpawn()).run();
+(new TestSpawn())._spawnTests();

@@ -18,7 +18,7 @@ defaults:
 
   aws:
     region:           !env AWS_REGION
-    bucket:           !env AWS_BUCKET
+    bucket:           !env LOG_BUCKET
     credentials:
       accessKeyId:      !env AWS_ACCESS_KEY_ID
-      secretAccessKey:  !env AWS_SECRET_ACCESS_KEY
+      secretAccessKey:  !env AWS_SECRET_KEY
