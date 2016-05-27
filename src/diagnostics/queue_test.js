@@ -1,7 +1,7 @@
 'use strict';
 
 describe('Queue', function () {
-  var assert      = require('assert');
+  var assume      = require('assume');
   var helper      = require('./helper');
   var slugid      = require('slugid');
   var taskcluster = require('taskcluster-client');
@@ -12,40 +12,30 @@ describe('Queue', function () {
     return;
   }
 
-  it("can define task", function (done) {
+  it("can create task",async function (done) {
     this.timeout(60*1000);
     let taskId = slugid.v4();
     let testDef = helper.simpleTaskDef(taskId);
 
-    let getMessage = new Promise((resolve, reject) => {
-        return helper.listener.on('message', message => {
-          return resolve(message.payload);
-        }).on('error', error => {
-          throw new Error("Error defining task");
-        });
-      });
-
-    helper.listener.bind(helper.queueEvents.taskDefined({ taskId }));
-    return helper.listener.resume().then(()=>{
+    await helper.listener.bind(helper.queueEvents.taskDefined({ taskId }));
+    await helper.listener.resume();
+    try{
+      let queueResponse = await helper.queue.createTask(taskId,testDef);
       debug("Task defined with taskId %s", taskId);
-      return helper.queue.defineTask(taskId,testDef);
-    }).then(() => {
-      return getMessage;
-    }).then(payload => {
-      debug('Message payload: %s',JSON.stringify(payload));
-      assert(payload.status.taskId === taskId, "Received wrong taskId");
-    }).then(() => {
+      debug('Message payload: %s',JSON.stringify(queueResponse));
+      assume(queueResponse.status.taskId).equals(taskId);
       /*
       We use queue.task() to check if the task exists
       */
-      return helper.queue.task(taskId);
-    }).then( response => {
-      assert(response.created === testDef.created, "Wrong task");
-      assert(response.schedulerId === testDef.schedulerId, "Wrong schedulerId");
-      assert.deepEqual(response.metadata, testDef.metadata);
-
-      done();
-    }).catch(done);
+      let response = await helper.queue.task(taskId);
+      debug("task response: ",response);
+      assume(response.created).equals(testDef.created);
+      assume(response.schedulerId).equals(testDef.schedulerId);
+      assume(response.metadata).eql(testDef.metadata);
+      return done();
+    }catch (err) {
+      done(err);
+    }
   });
 
   after(function () {

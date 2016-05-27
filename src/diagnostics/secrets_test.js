@@ -3,7 +3,7 @@ describe("Secrets", function () {
   var taskcluster = require('taskcluster-client');
   var slugid      = require('slugid');
   var helper      = require('./helper');
-  var assert      = require('assert');
+  var assume      = require('assume');
   var debug       = require('debug')('secrets:test');
 
   let data = slugid.v4();
@@ -24,91 +24,80 @@ describe("Secrets", function () {
     expires:  taskcluster.fromNowJSON('- 2 hours')
   };
 
-  it('should write a secret (allowed) and retreive it', function (done) {
+  it('should write a secret (allowed) and retreive it', async function (done) {
     this.timeout(30*1000);
-    return helper.secrets.set("garbage/"+key1, payloadExpires)
-    .catch(err =>{
-      debug(err);
-      throw new Error("Error while writing secret");
-    })
-    .then(() => {
-      return helper.secrets.get("garbage/"+key1);
-    })
-    .catch(err => {
-      throw new Error("Error retrieving secret");
-    })
-    .then(secret => {
+    try{
+      await helper.secrets.set("garbage/"+key1, payloadExpires);
+      let secret = await helper.secrets.get("garbage/"+key1);
       debug(secret);
-      assert(secret.secret.data === payloadExpires.secret.data, "Wrong object received");
-      done();
-    });
+      assume(secret.secret.data).equals(payloadExpires.secret.data);
+      return done();
+    } catch(err) {
+      return done(err);
+    }
   });
 
-  it('should reject writing a secret with disallowed scope', function (done) {
+  it('should reject writing a secret with disallowed scope', async function (done) {
     this.timeout(30*1000);
-    return helper.secrets.set("wrong-scope/"+key1, payloadExpires)
-    .catch(err => {
-      assert(err.statusCode === 403, "Wrong error code");
+    try{
+      await helper.secrets.set("wrong-scope/"+key1, payloadExpires);
+      return done((new Error("Secret should be disallowed")));
+    } catch (err) {
+      assume(err.statusCode).equals(403);
       done();
-    })
-    .then(() => {
-      throw new Error("Secret should be disallowed");
-      done();
-    });
+    }
+
   });
 
-  it('should update key', function (done) {
+  it('should update key', async function (done) {
     this.timeout(60*1000);
-    return helper.secrets.set("garbage/"+key1, payloadExpires)
-    .then(() => {
-      return helper.secrets.get("garbage/"+key1);
-    }).then(secret => {
+    try{
+      await helper.secrets.set("garbage/"+key1, payloadExpires)
+
+      let secret = await helper.secrets.get("garbage/"+key1);
       debug(secret);
-      assert(secret.secret.data === payloadExpires.secret.data);
-      return helper.secrets.set("garbage/"+key1, payloadExpires2);
-    })
-    .catch(err => {
-      debug(err);
-      done();
-    })
-    .then(() => {
+      assume(secret.secret.data).equals(payloadExpires.secret.data);
+
+      await helper.secrets.set("garbage/"+key1, payloadExpires2);
+
       debug("Retrieving new secret");
-      return helper.secrets.get("garbage/"+key1);
-    }).then(secret => {
+      secret = await helper.secrets.get("garbage/"+key1);
       debug(secret);
-      assert(secret.secret.data === payloadExpires2.secret.data);
-      done();
-    });
+      assume(secret.secret.data).equals(payloadExpires2.secret.data);
+
+      return done();
+
+    } catch (err) {
+      return done(err);
+    }
   });
 
-  it('should delete secret', function (done) {
+  it('should delete secret', async function (done) {
     this.timeout(60*1000);
-    return helper.secrets.set("garbage/"+key1, payloadExpires)
-    .then(() => {
-      return helper.secrets.remove("garbage/"+key1);
-    }).then(() => {
-      return helper.secrets.get("garbage/"+key1);
-    }).catch(err => {
+    await helper.secrets.set("garbage/"+key1, payloadExpires)
+    await helper.secrets.remove("garbage/"+key1);
+    try{
+      await helper.secrets.get("garbage/"+key1);
+      return done((new Error("Secret should not be found")));
+    } catch (err) {
       debug("Status code: ",err.statusCode);
-      assert(err.statusCode === 404, "Wrong status code");
-      done();
-    }).then(() => {
-      throw Error("Secret should be deleted");
-    });
+      assume(err.statusCode).equals(404);
+
+      return done();
+    }
   });
 
-  it('should fail when reading an expired secret', function (done) {
+  it('should fail when reading an expired secret', async function (done) {
     this.timeout(30*1000);
-    return helper.secrets.set("garbage/"+key2, payloadExpired)
-    .then(() => {
-      return helper.secrets.get("garbage/"+key2);
-    }).catch(err => {
+    await helper.secrets.set("garbage/"+key2, payloadExpired);
+    try{
+      await helper.secrets.get("garbage/"+key2);
+      return done((new Error("Secret should not be retreivable")));
+    }catch (err) {
       debug("Error statusCode", err.statusCode);
-      assert(err.statusCode === 410);
-      done();
-    }).then(() => {
-      throw new Error("Secret should not be retreivable");
-    });
+      assume(err.statusCode).equals(410);
+      return done();
+    }
   })
 
 });

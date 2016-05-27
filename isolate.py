@@ -2,7 +2,7 @@ import os
 import re
 import sys
 
-rootdir = 'src/diagnostics/'
+rootdir = 'lib/diagnostics/'
 p = re.compile(r'(.+)_test.js$')
 q = re.compile(r'(.+)_iso.js$')
 

@@ -11,6 +11,10 @@ var _ = require('lodash');
 
 const DIAGNOSTICS_ROOT = path.join(__dirname,'diagnostics');
 
+/*
+This imports tests from the diagnostics folder and runs them
+*/
+
 class TestRunner {
   constructor (path_to_diagnostics) {
     this.files = this._getPaths(path_to_diagnostics);
@@ -36,7 +40,7 @@ class TestRunner {
         queue =  _.concat(queue,dir.map(sub => p+'/'+sub));
       }else if (stat.isFile()) {
         //console.log("FILE:",p);
-        if (p.indexOf('test.js') !== -1) {
+        if (p.indexOf('test.js') !== -1 && p.indexOf('.map') === -1) {
           files.push(p);
         }
       }

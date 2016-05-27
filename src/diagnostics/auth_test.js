@@ -3,7 +3,7 @@ describe('Auth', function () {
   var taskcluster = require('taskcluster-client');
   var hawk        = require('hawk');
   var helper      = require('./helper');
-  var assert      = require('assert');
+  var assume      = require('assume');
   var debug       = require('debug')('auth:test');
   var slugid      = require('slugid');
   var _           = require('lodash');
@@ -17,40 +17,41 @@ describe('Auth', function () {
     credentials:  helper.cfg.taskcluster.credentials
   });
 
-  it('can get client', function (done) {
+  it('can get client', async function (done) {
     this.timeout(20*1000);
     let clientId = helper.cfg.taskcluster.credentials.clientId;
-    auth.client(clientId).then(client => {
+    try{
+      let client = await auth.client(clientId);
       debug("Client: %s",JSON.stringify(client));
-      assert(client.clientId === clientId);
+      assume(client.clientId).equals(clientId);
       return done();
-    });
+    } catch (err) {
+      return done(err);
+    }
   });
 
-  it('can create and delete client', function (done) {
+  it('can create and delete client', async function (done) {
     this.timeout(30*1000);
     let clientId = helper.cfg.taskcluster.credentials.clientId+'/'+slugid.nice();
     let expires = new Date();
     expires.setMinutes(expires.getMinutes() + 2);
     expires = expires.toJSON();
     debug("Creating client");
-    return auth.createClient(clientId,{
-      expires,
-      description: "delete me"
-    })
-    .catch(err => {
-      throw err;
-    })
-    .then(client => {
-      debug(client);
-      assert(client.clientId === clientId);
-      auth.deleteClient(clientId).then(() => {
-        return done();
+    try{
+      let client = await auth.createClient(clientId,{
+        expires,
+        description: "delete me"
       });
-    });
+      debug(client);
+      assume(client.clientId).equals(clientId);
+      await auth.deleteClient(clientId);
+      return done();
+    } catch (err) {
+      return done(err);
+    }
   });
 
-  it('can answer authenticateHawk requests', function (done) {
+  it('can answer authenticateHawk requests', async function (done) {
     let credentials = helper.cfg.taskcluster.credentials;
     this.timeout(30*1000);
 
@@ -72,14 +73,15 @@ describe('Auth', function () {
           },
           payload: '{}'
         }).field;
-
-    auth.authenticateHawk(data).then(result => {
+    try {
+      let result = await auth.authenticateHawk(data);
       debug("Result: %s",JSON.stringify(result));
-      assert(result.status === 'auth-success',"Auth failed");
-      assert(result.hash === 'XtNvx1FqrUYVOLlne3l2WzcyRfj9QeC6YtmhMKKFMGY=', "Wrong hash");
+      assume(result.status).equals('auth-success');
+      assume(result.hash).equals('XtNvx1FqrUYVOLlne3l2WzcyRfj9QeC6YtmhMKKFMGY=');
       return done();
-    });
+    } catch (err) {
+      return done(err);
+    }
   });
 
-  return;
 });

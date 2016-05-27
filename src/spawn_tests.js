@@ -1,35 +1,66 @@
 'use strict';
 
-var spawn = require('child_process').spawn;
+var spawn         = require('child_process').spawn;
 var StringDecoder = require('string_decoder').StringDecoder;
-var path = require('path');
+var path          = require('path');
+var slugid        = require('slugid');
+var LogReporter   = require('./Reporter').LogReporter;
 
-var spawnTests = () => {
-  var s = spawn('node',['src/test_server.js'],{
-    cwd: path.join(__dirname,'../'),
-    detached: true
-  });
+/*
+  This module generates a testId and spawns a TestRunner which runs tests and
+  uploads raw logs.
+  The uploading and running will be separated soon
+*/
 
-  var sdecode = new StringDecoder('utf8');
+class TestSpawn {
+  constructor () {
+    this.reporter = new LogReporter();
+    this.decoder = new StringDecoder('utf8');
+    this._spawnTests = this._spawnTests.bind(this);
+    this.run = this.run.bind(this);
+  }
 
-  var outbuff = '';
-  s.stdout.on('data',data => {
-    let d = sdecode.write(data);
-    outbuff += d;
-    console.log(d);
-  });
-  s.stderr.on('data',data => {
-    console.log(sdecode.write(data));
-  });
+  _spawnTests () {
+    let testId = slugid.nice();
+    let outbuff = '';
 
-  s.on('close',() => {
-    //Plug in a reporter here to print out the raw output of the tests
-    console.log(outbuff);
-  })
+    this.reporter.setTestId(testId);
+    console.log("Running tests with id",testId);
+
+    let addToBuffer = data => {
+      let str = this.decoder.write(data);
+      outbuff += str;
+      console.log(str);
+    }
+
+    let startMessage = "Test started at " + (new Date()).toJSON() + "\n";
+    outbuff += startMessage;
+    console.log(startMessage);
+
+    let s = spawn('node',['lib/tests.js','--id',testId],{
+      cwd: path.join(__dirname,'../'),
+      detached: true
+    });
+
+    s.stdout.on('data',addToBuffer);
+    s.stderr.on('error',addToBuffer);
+
+    s.on('close',async () => {
+      var endMessage = "Tests ended at "+ (new Date()).toJSON() + "\n";
+      console.log(outbuff);
+      outbuff += endMessage;
+      var result = await this.reporter.upload(outbuff)
+      console.log(result);
+    });
+  }
+
+  run (interval){
+    interval = interval || 6*60*60*1000; // 6 hours
+    this._spawnTests();
+    this.runInterval = setInterval(function () {
+      this._spawnTests();
+    }, interval);
+  }
 }
 
-spawnTests();
-setInterval(() => {
-  console.log("Spawning tests");
-  spawnTests();
-},300*1000);
+(new TestSpawn()).run();

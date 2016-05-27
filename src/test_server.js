@@ -1,13 +1,12 @@
 'use strict';
-var TestRunner =  require('./TestRunner');
-var Reporter   =  require('./Reporter');
-var debug      =  require('debug')('diagnostics:test-server');
+var TestRunner    = require('./TestRunner');
+var JSONReporter  = require('./Reporter').JSONReporter;
+var debug         = require('debug')('diagnostics:test-server');
 
-var run = () => {
+var run = async () => {
   let tr = new TestRunner();
-  let reporter = new Reporter();
-  //debug(reporter.makeResultString({ failing: [] }));
-  tr.runTests().then(debug); //Here's where the reporting code goes
+  result = tr.runTests();
+  console.log(result);
 }
 
 run();
