@@ -16,6 +16,8 @@ class Reporter {
     });
 
     this.testId = testId;
+    this.env = helper.cfg.env || 'development';
+
     this.s3 = new AWS.S3({ params: { Bucket: helper.cfg.aws.bucket } });
     this.makeResultString = this.makeResultString.bind(this);
     this.upload = this.upload.bind(this);
@@ -32,8 +34,15 @@ class Reporter {
   upload (result) {
     let Key = this.makeResultString(result);
     debug("Uploading object:", Key);
+
+    let params = {
+      Key ,
+      Body:         JSON.stringify(result),
+      ContentType:  this.ContentType
+    };
+
     return new Promise((resolve, reject) => {
-      return this.s3.putObject({ Key , Body: JSON.stringify(result)}, (err, data) => {
+      return this.s3.putObject(params, (err, data) => {
         if(err){
           console.error(err);
           return reject(err);
@@ -49,13 +58,15 @@ class Reporter {
 class JSONReporter extends Reporter {
   constructor (testId) {
     super(testId);
+    this.ContentType      = 'application/json';
     this.makeResultString = this.makeResultString.bind(this);
   }
 
   makeResultString (result) {
     let rev_date = MAX_NUMBER - Math.round(Date.now()/1000);
     let stamp = (new Date()).toJSON();
-    return ['taskcluster-diagnostic-logs',
+    return [this.env,
+      'JSON',
       rev_date,
       stamp,
       this.testId + '.json'].join('/');
@@ -67,13 +78,14 @@ class JSONReporter extends Reporter {
 class LogReporter extends Reporter {
   constructor (testId) {
     super(testId);
+    this.ContentType      = 'text/plain';
     this.makeResultString = this.makeResultString.bind(this);
   }
 
   makeResultString (result) {
-    let rev_date = MAX_NUMBER - Math.round(Date.now()/1000);
-    let stamp = (new Date()).toJSON();
-    return ['taskcluster-diagnostic-logs',
+    let rev_date  = MAX_NUMBER - Math.round(Date.now()/1000);
+    let stamp     = (new Date()).toJSON();
+    return [this.env,'RAW',
       rev_date,
       stamp,
       this.testId + '.log' ].join('/');
