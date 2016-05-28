@@ -50,7 +50,7 @@ class TestRunner {
     return files;
   }
 
-  runTests () {
+  async runTests () {
     let result = {};
     let suite_stack = [];
     result.passing = [];

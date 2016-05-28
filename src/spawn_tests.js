@@ -46,8 +46,8 @@ class TestSpawn {
 
     s.on('close',async () => {
       var endMessage = "Tests ended at "+ (new Date()).toJSON() + "\n";
-      console.log(outbuff);
       outbuff += endMessage;
+      console.log(outbuff);
       var result = await this.reporter.upload(outbuff)
       console.log(result);
     });

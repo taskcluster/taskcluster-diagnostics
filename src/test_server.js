@@ -5,7 +5,7 @@ var debug         = require('debug')('diagnostics:test-server');
 
 var run = async () => {
   let tr = new TestRunner();
-  result = tr.runTests();
+  let result = await tr.runTests();
   console.log(result);
 }
 

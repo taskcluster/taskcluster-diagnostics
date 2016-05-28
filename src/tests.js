@@ -10,15 +10,18 @@ assume(argv.id).is.a('string');
 
 let testId = argv.id;
 
-var run = () => {
+var run = async () => {
   let tr = new TestRunner();
   let reporter = new JSONReporter(testId);
-  //debug(reporter.makeResultString({ failing: [] }));
-  return tr.runTests()
-  .then(result => {
+
+  try{
+    let result = await tr.runTests()
     debug(result);
-    return reporter.upload(result).then(console.log);
-  }); //Here's where the reporting code goes
+    let uploadResult = await reporter.upload(result);
+    console.log(uploadResult);
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 run();
