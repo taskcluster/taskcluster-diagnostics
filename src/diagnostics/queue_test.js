@@ -17,8 +17,6 @@ describe('Queue', function () {
     let taskId = slugid.v4();
     let testDef = helper.simpleTaskDef(taskId);
 
-    await helper.listener.bind(helper.queueEvents.taskDefined({ taskId }));
-    await helper.listener.resume();
     try{
       let queueResponse = await helper.queue.createTask(taskId,testDef);
       debug("Task defined with taskId %s", taskId);

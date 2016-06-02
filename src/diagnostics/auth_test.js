@@ -18,11 +18,11 @@ describe('Auth', function () {
   });
 
   it('can get client', async function (done) {
-    this.timeout(20*1000);
+    this.timeout(30*1000);
     let clientId = helper.cfg.taskcluster.credentials.clientId;
     try{
       let client = await auth.client(clientId);
-      debug("Client: %s",JSON.stringify(client));
+      debug("Client: ",client);
       assume(client.clientId).equals(clientId);
       return done();
     } catch (err) {
@@ -53,6 +53,7 @@ describe('Auth', function () {
 
   it('can answer authenticateHawk requests', async function (done) {
     let credentials = helper.cfg.taskcluster.credentials;
+
     this.timeout(30*1000);
 
     let data = {
@@ -75,7 +76,7 @@ describe('Auth', function () {
         }).field;
     try {
       let result = await auth.authenticateHawk(data);
-      debug("Result: %s",JSON.stringify(result));
+      debug("Result: ",result);
       assume(result.status).equals('auth-success');
       assume(result.hash).equals('XtNvx1FqrUYVOLlne3l2WzcyRfj9QeC6YtmhMKKFMGY=');
       return done();
