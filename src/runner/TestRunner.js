@@ -1,14 +1,14 @@
 'use strict';
 
-var Mocha     = require('mocha');
-var path      = require('path');
-var base      = require('taskcluster-base');
-var fs        = require('fs');
-var helper    = require('../helper');
-// var exchanges = require('../exchanges');
-var Promise   = require('bluebird');
-var debug     = require('debug')('diagnostics:runner');
-var _         = require('lodash');
+var Mocha         = require('mocha');
+var path          = require('path');
+var base          = require('taskcluster-base');
+var fs            = require('fs');
+var helper        = require('../helper');
+var EventEmitter  = require('events');
+var Promise       = require('bluebird');
+var debug         = require('debug')('diagnostics:runner');
+var _             = require('lodash');
 
 
 const DIAGNOSTICS_ROOT = path.join(__dirname,'../diagnostics');
@@ -18,12 +18,14 @@ This imports tests from the diagnostics folder and runs them
 */
 
 class TestRunner {
+  
   constructor (path_to_diagnostics) {
-
+    
     this.files = this._getPaths(path_to_diagnostics);
     this.mocha = new Mocha({ ui :'bdd'});
-    debug("TESTS:",this.files);
     this.files.map(file => this.mocha.addFile(file));
+
+    debug("TESTS:",this.files);
 
   }
 
@@ -57,10 +59,13 @@ class TestRunner {
   }
 
   async runTests () {
+
+    let that = this;
+    
     let result = {};
     let suite_stack = [];
-    result.passing = [];
-    result.failing = [];
+    result.pass = [];
+    result.fail = [];
 
     let setResult = (test, testResult) => {
       result[testResult].push(_.concat(suite_stack,test.title).join('/'));
@@ -68,14 +73,14 @@ class TestRunner {
 
     return new Promise((resolve, reject) => {
       this.mocha.run()
-      .on('suite', suite => {
+       .on('suite', suite => {
         suite_stack.push(suite.title);
       })
       .on('suite end', suite => {
         suite_stack = _.dropRight(suite_stack);
       })
-      .on('pass', test => setResult(test, 'passing'))
-      .on('fail', test => setResult(test, 'failing'))
+      .on('pass', test => setResult(test, 'pass'))
+      .on('fail', test => setResult(test, 'fail'))
       .on('end', () => {
         base.app.notifyLocalAppInParentProcess(helper.cfg.port);
         return resolve(result);

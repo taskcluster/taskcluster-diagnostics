@@ -10,12 +10,13 @@ assume(argv.id).is.a('string');
 
 let testId = argv.id;
 
+
 var run = async () => {
   let tr = new TestRunner();
   let reporter = new JSONReporter(testId);
-
+  
   try{
-    let result = await tr.runTests()
+    let result = await tr.runTests();
     debug(result);
     let uploadResult = await reporter.upload(result);
     console.log(uploadResult);

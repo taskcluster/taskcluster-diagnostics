@@ -16,43 +16,52 @@ class TestSpawn {
   constructor () {
     this.reporter = new LogReporter();
     this.decoder = new StringDecoder('utf8');
+
     this._spawnTests = this._spawnTests.bind(this);
+    this.run = this.run.bind(this);
   }
 
   _spawnTests () {
+    
     let testId = slugid.nice();
-    let outbuff = '';
 
+    this.outbuff = '';
+    
     this.reporter.setTestId(testId);
     console.log("Running tests with id",testId);
+    
+    let startMessage = "Test started at " + (new Date()).toJSON() + "\n";
+    this.outbuff += startMessage;
+    console.log(startMessage);
 
     let addToBuffer = data => {
       let str = this.decoder.write(data);
-      outbuff += str;
+      this.outbuff += str;
       console.log(str);
     }
 
-    let startMessage = "Test started at " + (new Date()).toJSON() + "\n";
-    outbuff += startMessage;
-    console.log(startMessage);
-
-    let s = spawn('node',['lib/tests.js','--id',testId],{
+    this.testProcess = spawn('node',['lib/tests.js','--id',testId],{
       cwd: path.join(__dirname,'../'),
-      detached: true
+      detached: true,
+      stdio: ['ignore', 'pipe', 'pipe']
     });
 
-    s.stdout.on('data',addToBuffer);
-    s.stderr.on('error',addToBuffer);
+    this.testProcess.stdout.on('data', addToBuffer);
+    this.testProcess.stderr.on('data', addToBuffer);
 
-    s.on('close',async () => {
+    this.testProcess.on('close',async () => {
       var endMessage = "Tests ended at "+ (new Date()).toJSON() + "\n";
-      outbuff += endMessage;
-      console.log(outbuff);
-      var result = await this.reporter.upload(outbuff)
+      this.outbuff += endMessage;
+      var result = await this.reporter.upload(outbuff);
       console.log(result);
     });
+
+  }
+
+  run () {
+    return this._spawnTests();
   }
 
 }
 
-(new TestSpawn())._spawnTests();
+(new TestSpawn()).run();
