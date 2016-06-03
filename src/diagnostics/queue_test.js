@@ -6,7 +6,7 @@ describe('Queue', function () {
   var slugid      = require('slugid');
   var taskcluster = require('taskcluster-client');
   var debug       = require('debug')('queue:test');
-
+    
   if(!helper.cfg.taskcluster.credentials.accessToken){
     debug("Skipping test due to missing credentials");
     return;
@@ -36,7 +36,25 @@ describe('Queue', function () {
     }
   });
 
-  after(function () {
-    helper.listener.close();
+  it('should find createTask to be idempotent', async function (done) {
+    this.timeout(30*1000);
+    let taskId = slugid.nice();
+    let testDef = helper.simpleTaskDef(taskId);
+
+    testDef.dependencies = [taskId];
+    
+    debug("Using taskId: ",taskId);
+    try{
+      
+      let qr = await helper.queue.createTask(taskId, testDef);
+      debug(qr);
+      let qr1 = await helper.queue.createTask(taskId, testDef);
+      debug(qr1);
+      assume(qr).eql(qr1);
+      done();
+    }catch (err){
+      done(err);
+    }
+    
   });
 });
