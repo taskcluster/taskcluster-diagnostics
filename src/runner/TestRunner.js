@@ -1,15 +1,17 @@
 'use strict';
 
-var Mocha = require('mocha');
-var path = require('path');
-var base = require('taskcluster-base');
-var fs = require('fs');
-var helper = require('./diagnostics/helper');
-var Promise = require('bluebird');
-var debug = require('debug')('diagnostics:runner');
-var _ = require('lodash');
+var Mocha     = require('mocha');
+var path      = require('path');
+var base      = require('taskcluster-base');
+var fs        = require('fs');
+var helper    = require('../helper');
+// var exchanges = require('../exchanges');
+var Promise   = require('bluebird');
+var debug     = require('debug')('diagnostics:runner');
+var _         = require('lodash');
 
-const DIAGNOSTICS_ROOT = path.join(__dirname,'diagnostics');
+
+const DIAGNOSTICS_ROOT = path.join(__dirname,'../diagnostics');
 
 /*
 This imports tests from the diagnostics folder and runs them
@@ -17,16 +19,20 @@ This imports tests from the diagnostics folder and runs them
 
 class TestRunner {
   constructor (path_to_diagnostics) {
+
     this.files = this._getPaths(path_to_diagnostics);
     this.mocha = new Mocha({ ui :'bdd'});
     debug("TESTS:",this.files);
     this.files.map(file => this.mocha.addFile(file));
+
   }
 
   _getPaths (path_to_diagnostics) {
+
     if(!path_to_diagnostics){
       path_to_diagnostics = DIAGNOSTICS_ROOT;
     }
+
     let queue = fs.readdirSync(path_to_diagnostics);
     queue = queue.map(q => path.join(path_to_diagnostics,q));
     let files = [];
@@ -39,7 +45,7 @@ class TestRunner {
         let dir = fs.readdirSync(p)
         queue =  _.concat(queue,dir.map(sub => p+'/'+sub));
       }else if (stat.isFile()) {
-        //console.log("FILE:",p);
+      
         if (p.indexOf('test.js') !== -1 && p.indexOf('.map') === -1) {
           files.push(p);
         }

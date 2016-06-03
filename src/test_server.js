@@ -1,6 +1,6 @@
 'use strict';
-var TestRunner    = require('./TestRunner');
-var JSONReporter  = require('./Reporter').JSONReporter;
+var TestRunner    = require('./runner/TestRunner');
+var JSONReporter  = require('./reporter/Reporter').JSONReporter;
 var debug         = require('debug')('diagnostics:test-server');
 
 var run = async () => {

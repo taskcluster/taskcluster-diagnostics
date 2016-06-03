@@ -1,7 +1,7 @@
 'use strict';
 describe('DockerWorker', function () {
   var taskcluster = require('taskcluster-client');
-  var helper      = require('../helper');
+  var helper      = require('../../helper');
   var slugid      = require('slugid');
   var debug       = require('debug')('worker:test');
   var assume      = require('assume');

@@ -10,14 +10,7 @@ let cfg = base.config({});
 let exchanges = new base.Exchanges({
   title:        "Diagnostics AMQP messages",
   description:  "Publish messages on test runs...",
-  schemaPrefix: (() =>{
-
-      let s = cfg.exchange.schemaPrefix;
-      assume(s).is.a('string');
-      assume(s).is.ok();
-      return s;
-      
-    })()
+  schemaPrefix: 'http://schemas.taskcluster.net/diagnostics/v1'
 });
 
 let commonMessageBuilder = message => {
@@ -26,28 +19,35 @@ let commonMessageBuilder = message => {
 }
 
 let buildRoutingKey = () => {
-    return [
-	{
-	    name: 'routingKeyKind',
-	    summary: 'Identifier for the routing key kind. Always primary',
-	    constant: 'primary',
-	    required: true
-	}
-    ];
+  return [
+    {
+      name: 'routingKeyKind',
+      summary: 'Identifier for the routing key kind',
+      constant: 'primary',
+      required: true
+    },
+
+    {
+      name: 'reserved',
+      summary: 'Space reserved for future routing key entries',
+      multipleWords: true,
+      maxSize: 1
+    }
+  ];
 }
 
 let commonRoutingKeyBuilder = (message, routing) => {
-    return {
-	testId:     message.testId,
-	jsonLogUrl: message.jsonLogUrl,
-	rawLogUrl:  message.rawLogUrl,
-	payload:    message.payload
-    };
+  return {
+    testId:     message.testId,
+    jsonLogUrl: message.jsonLogUrl,
+    rawLogUrl:  message.rawLogUrl,
+    payload:    message.payload
+  };
 }
 
 let commonCCBuilder = (message, routes) => {
-    assume(routes).is.an.instanceOf(Array);
-    return routes.map(route => "route." + route );
+  assume(routes).is.an.instanceOf(Array);
+  return routes.map(route => "route." + route );
 }
 
 exchanges.declare({
@@ -66,7 +66,7 @@ exchanges.declare({
     messageBuilder:    commonMessageBuilder,
     routingKeyBuilder: commonRoutingKeyBuilder,
     CCBuilder:         commonCCBuilder
-n});
+});
 
 exchanges.declare({
     exchange: 'diagnostics-complete',

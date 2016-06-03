@@ -2,7 +2,7 @@
 describe("Secrets", function () {
   var taskcluster = require('taskcluster-client');
   var slugid      = require('slugid');
-  var helper      = require('./helper');
+  var helper      = require('../helper');
   var assume      = require('assume');
   var debug       = require('debug')('secrets:test');
 
@@ -38,7 +38,7 @@ describe("Secrets", function () {
   });
 
   it('should reject writing a secret with disallowed scope', async function (done) {
-    this.timeout(30*1000);
+    this.timeout(2*60*1000);
     try{
       await helper.secrets.set("wrong-scope/"+key1, payloadExpires);
       return done((new Error("Secret should be disallowed")));
@@ -50,7 +50,7 @@ describe("Secrets", function () {
   });
 
   it('should update key', async function (done) {
-    this.timeout(60*1000);
+    this.timeout(2*60*1000);
     try{
       await helper.secrets.set("garbage/"+key1, payloadExpires)
 
@@ -73,7 +73,7 @@ describe("Secrets", function () {
   });
 
   it('should delete secret', async function (done) {
-    this.timeout(60*1000);
+    this.timeout(2*60*1000);
     await helper.secrets.set("garbage/"+key1, payloadExpires)
     await helper.secrets.remove("garbage/"+key1);
     try{
@@ -88,7 +88,7 @@ describe("Secrets", function () {
   });
 
   it('should fail when reading an expired secret', async function (done) {
-    this.timeout(30*1000);
+    this.timeout(2*60*1000);
     await helper.secrets.set("garbage/"+key2, payloadExpired);
     try{
       await helper.secrets.get("garbage/"+key2);

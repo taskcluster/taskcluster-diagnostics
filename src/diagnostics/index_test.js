@@ -1,13 +1,13 @@
 'use strict';
 describe('Index', function () {
   var taskcluster = require('taskcluster-client');
-  var helper      = require('./helper.js');
+  var helper      = require('../helper.js');
   var slugid      = require('slugid');
   var assume      = require('assume');
   var debug       = require('debug')('index:test');
 
   it('should index and rank task', async function (done) {
-    this.timeout(30*1000);
+    this.timeout(2*60*1000);
     let expires = taskcluster.fromNowJSON('1 hour');
     let taskId = [slugid.nice(),slugid.nice()];
     let ns = 'garbage.tc-diagnostics.' + slugid.nice();
@@ -45,7 +45,7 @@ describe('Index', function () {
   });
 
   it('should fail when trying to find non existing task', async function (done) {
-    this.timeout(30*1000);
+    this.timeout(2*60*1000);
     let ns = slugid.nice() + '.' + slugid.nice();
     debug(ns);
     try{
@@ -58,7 +58,7 @@ describe('Index', function () {
   })
 
   it('should find top level namespaces', async function(done) {
-    this.timeout(30*1000);
+    this.timeout(2*60*1000);
     let result = await helper.index.listNamespaces('',{});
     debug("Top-level namespaces: ");
     result.namespaces.map(ns => {
@@ -69,7 +69,7 @@ describe('Index', function () {
   });
 
   it('should find top level tasks', async function(done) {
-    this.timeout(30*1000);
+    this.timeout(2*60*1000);
     let result = await helper.index.listTasks('',{});
     debug("Top-level tasks: ");
     result.tasks.map(task => {

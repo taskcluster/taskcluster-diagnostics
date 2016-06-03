@@ -1,0 +1,16 @@
+$schema:	http://json-schema.org/draft-04/schema#
+title:		"Diagnostics Started Message"
+description:	|
+	Message Reporting that diagnostics has been started
+type:		object
+properties:
+	version:	{$const: message-version}
+	testId:
+		description:	|
+			Id of the test instance that is running
+		type: 	string
+
+additionalProperties: false
+required:
+	- version
+	- testId

@@ -2,7 +2,7 @@
 describe('Auth', function () {
   var taskcluster = require('taskcluster-client');
   var hawk        = require('hawk');
-  var helper      = require('./helper');
+  var helper      = require('../helper');
   var assume      = require('assume');
   var debug       = require('debug')('auth:test');
   var slugid      = require('slugid');

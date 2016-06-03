@@ -1,7 +1,7 @@
 'use strict';
 var AWS     = require('aws-sdk');
 var debug   = require('debug')('diagnostics:reporter');
-var helper  = require('./diagnostics/helper');
+var helper  = require('../helper');
 var _       = require('lodash');
 
 const MAX_NUMBER = 999999999999999;

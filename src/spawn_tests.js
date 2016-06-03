@@ -4,7 +4,7 @@ var spawn         = require('child_process').spawn;
 var StringDecoder = require('string_decoder').StringDecoder;
 var path          = require('path');
 var slugid        = require('slugid');
-var LogReporter   = require('./Reporter').LogReporter;
+var LogReporter   = require('./reporter/Reporter').LogReporter;
 
 /*
   This module generates a testId and spawns a TestRunner which runs tests and

@@ -2,7 +2,7 @@
 
 describe('Queue', function () {
   var assume      = require('assume');
-  var helper      = require('./helper');
+  var helper      = require('../helper');
   var slugid      = require('slugid');
   var taskcluster = require('taskcluster-client');
   var debug       = require('debug')('queue:test');
@@ -36,25 +36,33 @@ describe('Queue', function () {
     }
   });
 
-  it('should find createTask to be idempotent', async function (done) {
-    this.timeout(30*1000);
-    let taskId = slugid.nice();
-    let testDef = helper.simpleTaskDef(taskId);
-
-    testDef.dependencies = [taskId];
+  ['self-dependency','no self-dependency'].map( dep => {
     
-    debug("Using taskId: ",taskId);
-    try{
+    it('createTask is idempotent with ' + dep , async function (done) {
+      this.timeout(60*1000);
+      let taskId = slugid.nice();
+      let testDef = helper.simpleTaskDef(taskId);
+
+      if(dep == 'self-dependency'){
+        testDef.dependencies = [taskId];
+      }
       
-      let qr = await helper.queue.createTask(taskId, testDef);
-      debug(qr);
-      let qr1 = await helper.queue.createTask(taskId, testDef);
-      debug(qr1);
-      assume(qr).eql(qr1);
-      done();
-    }catch (err){
-      done(err);
-    }
+      debug("Using taskId: ",taskId);
+      try{
+        
+        let qr = await helper.queue.createTask(taskId, testDef);
+        debug(qr);
+        await helper.queue.scheduleTask(taskId);
+        let qr1 = await helper.queue.createTask(taskId, testDef);
+        debug(qr1);
+        assume(qr).eql(qr1);
+        done();
+      }catch (err){
+        done(err);
+      }
+      
+    });
     
   });
+
 });
