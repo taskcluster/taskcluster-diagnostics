@@ -52,7 +52,6 @@ describe('Queue', function () {
         
         let qr = await helper.queue.createTask(taskId, testDef);
         debug(qr);
-        await helper.queue.scheduleTask(taskId);
         let qr1 = await helper.queue.createTask(taskId, testDef);
         debug(qr1);
         assume(qr).eql(qr1);

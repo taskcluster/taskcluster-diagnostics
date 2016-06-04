@@ -1,6 +1,6 @@
 'use strict';
 var TestRunner    = require('./runner/TestRunner');
-var JSONReporter  = require('./reporter/Reporter').JSONReporter;
+var Reporter  = require('./reporter/Reporter');
 var debug         = require('debug')('diagnostics:test-server');
 var assume        = require('assume');
 var argv          = require('minimist')(process.argv.slice(2));
@@ -12,9 +12,10 @@ let testId = argv.id;
 
 
 var run = async () => {
-  let tr = new TestRunner();
-  let reporter = new JSONReporter(testId);
-  
+  let tr = TestRunner.createTestRunner();
+  let reporter = Reporter.createJSONReporter(testId);
+  tr.on('pass',console.log);
+  tr.on('fail',console.log);
   try{
     let result = await tr.runTests();
     debug(result);

@@ -51,6 +51,14 @@ class Reporter {
       });
     });
   }
+
+  static createJSONReporter (testId) {
+    return new JSONReporter(testId);
+  }
+
+  static createLogReporter (testId) {
+    return new LogReporter(testId);
+  }
 }
 
 /* Upload JSON logs */
@@ -92,7 +100,5 @@ class LogReporter extends Reporter {
   }
 }
 
-module.exports = {
-  JSONReporter,
-  LogReporter
-}
+module.exports = Reporter;
+

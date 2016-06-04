@@ -17,9 +17,11 @@ const DIAGNOSTICS_ROOT = path.join(__dirname,'../diagnostics');
 This imports tests from the diagnostics folder and runs them
 */
 
-class TestRunner {
+class TestRunner extends EventEmitter {
   
   constructor (path_to_diagnostics) {
+
+    super();
     
     this.files = this._getPaths(path_to_diagnostics);
     this.mocha = new Mocha({ ui :'bdd'});
@@ -73,19 +75,37 @@ class TestRunner {
 
     return new Promise((resolve, reject) => {
       this.mocha.run()
-       .on('suite', suite => {
+        .on('start',() => {
+          that.emit('start');
+        })
+
+        .on('suite', suite => {
         suite_stack.push(suite.title);
-      })
-      .on('suite end', suite => {
+        })
+
+        .on('suite end', suite => {
         suite_stack = _.dropRight(suite_stack);
-      })
-      .on('pass', test => setResult(test, 'pass'))
-      .on('fail', test => setResult(test, 'fail'))
-      .on('end', () => {
-        base.app.notifyLocalAppInParentProcess(helper.cfg.port);
-        return resolve(result);
-      });
+        })
+
+        .on('pass', test => {
+          setResult(test, 'pass');
+          that.emit('pass', test);
+        })
+
+        .on('fail', test => {
+          setResult(test, 'fail');
+          that.emit('fail', test);
+        })
+
+        .on('end', () => {
+          that.emit('end');         
+          return resolve(result);
+        });
     });
+  }
+
+  static createTestRunner (path) {
+    return new TestRunner(path);
   }
 
 }
