@@ -6,10 +6,10 @@ object containing a publisher, validator, and
 monitor configured using exchanges.js
 */
 
-var base = require('taskcluster-base');
-var helper = require('../helper');
-var exchanges = require('../exchanges');
-var _    = require('lodash');
+var base 				= require('taskcluster-base');
+var helper 			= require('../helper');
+var exchanges 	= require('../exchanges');
+var _    				= require('lodash');
 
 let cfg = helper.cfg;
 

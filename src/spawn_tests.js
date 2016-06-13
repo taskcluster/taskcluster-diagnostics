@@ -4,7 +4,7 @@ var spawn         = require('child_process').spawn;
 var StringDecoder = require('string_decoder').StringDecoder;
 var path          = require('path');
 var slugid        = require('slugid');
-var Reporter   = require('./reporter/Reporter');
+var Reporter   		= require('./reporter/Reporter');
 var debug         = require('debug')('spawn');
 /*
   This module generates a testId and spawns a TestRunner which runs tests and
@@ -64,20 +64,16 @@ class TestSpawn {
 
   async _uploadLogs (outbuff) {
     var result = await this.reporter.upload(outbuff);
-    debug(result);
+    console.log(result);
   }
 
   static runTests (upload) {
     let ts = new TestSpawn();
     ts._spawnTests().then(result => {
-
-      if(upload === true){
-        ts._uploadLogs(result);
-      }
-      
+			ts._uploadLogs(result);   
     }).catch(console.log);
   }
 
 }
 
-TestSpawn.runTests (true);
+TestSpawn.runTests ();

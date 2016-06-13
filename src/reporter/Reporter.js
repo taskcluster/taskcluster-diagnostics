@@ -3,6 +3,7 @@ var AWS     = require('aws-sdk');
 var debug   = require('debug')('diagnostics:reporter');
 var helper  = require('../helper');
 var _       = require('lodash');
+var taskcluster =	require('taskcluster-client');
 
 const MAX_NUMBER = 999999999999999;
 

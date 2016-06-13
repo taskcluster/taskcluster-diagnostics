@@ -2,6 +2,11 @@
 var taskcluster = require('taskcluster-client');
 var base        = require('taskcluster-base');
 
+/* This module contains helper functions and objects
+ * to be used throughout diagnostics.
+ */
+
+
 var getHelper = profile => {
 
   let helper = {};
