@@ -15,7 +15,7 @@ var debug         = require('debug')('spawn');
 class TestSpawn {
   
   constructor () {
-    this.reporter = Reporter.createLogReporter();
+    this.reporter = null;
     this.decoder = new StringDecoder('utf8');
 
     this._spawnTests = this._spawnTests.bind(this);
@@ -28,7 +28,7 @@ class TestSpawn {
 
     this.outbuff = '';
     
-    this.reporter.setTestId(testId);
+    this.reporter = Reporter.createLogReporter(testId);
     debug("Running tests with id",testId);
     
     let startMessage = "Test started at " + (new Date()).toJSON() + "\n";
@@ -55,9 +55,9 @@ class TestSpawn {
 
         var endMessage = "Tests ended at "+ (new Date()).toJSON() + "\n";
         this.outbuff += endMessage;
-        return resolve(outbuff);
+        return resolve(this.outbuff);
         
-      }).on('error',reject);      
+      });      
     });
 
   }
@@ -70,7 +70,7 @@ class TestSpawn {
   static runTests (upload) {
     let ts = new TestSpawn();
     ts._spawnTests().then(result => {
-			ts._uploadLogs(result);   
+	ts._uploadLogs(result);   
     }).catch(console.log);
   }
 

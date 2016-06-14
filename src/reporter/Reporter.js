@@ -3,7 +3,7 @@ var AWS     = require('aws-sdk');
 var debug   = require('debug')('diagnostics:reporter');
 var helper  = require('../helper');
 var _       = require('lodash');
-var taskcluster =	require('taskcluster-client');
+var taskcluster = require('taskcluster-client');
 
 const MAX_NUMBER = 999999999999999;
 
@@ -34,7 +34,7 @@ class Reporter {
 
   upload (result) {
     let Key = this.makeResultString(result);
-    debug("Uploading object:", Key);
+    console.log("Uploading object:", Key);
 
     let params = {
       Key ,
@@ -53,13 +53,6 @@ class Reporter {
     });
   }
 
-  static createJSONReporter (testId) {
-    return new JSONReporter(testId);
-  }
-
-  static createLogReporter (testId) {
-    return new LogReporter(testId);
-  }
 }
 
 /* Upload JSON logs */
@@ -101,5 +94,16 @@ class LogReporter extends Reporter {
   }
 }
 
-module.exports = Reporter;
+var createJSONReporter = (testId) => {
+  return new JSONReporter(testId);
+}
+
+var createLogReporter = (testId) => {
+  return new LogReporter(testId);
+}
+
+module.exports = {
+  createJSONReporter,
+  createLogReporter
+}
 
