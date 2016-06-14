@@ -14,8 +14,8 @@ let testId = argv.id;
 var run = async () => {
   let tr = TestRunner.createTestRunner();
   let reporter = Reporter.createJSONReporter(testId);
-  tr.on('pass',console.log);
-  tr.on('fail',console.log);
+//  tr.on('pass',console.log);
+//  tr.on('fail',console.log);
   try{
     let result = await tr.runTests();
     debug(result);
