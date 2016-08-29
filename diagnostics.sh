@@ -1,3 +1,5 @@
-DEBUG=worker:test,secrets:test,auth:test,queue:test,index:test,\
+DEBUG=spawn,worker:test,secrets:test,auth:test,queue:test,index:test,\
 diagnostics:reporter,diagnostics:runner,diagnostics:test-server \
-node lib/test_server.js
+npm run compile
+python isolate.py auth_test.js
+node lib/main.js default

@@ -13,6 +13,7 @@ def isolate_test(fname = None):
                     new_name = p.match(str(file)).group(1) +'_iso.js'
                     os.rename(os.path.join(path, file), os.path.join(path,new_name))
 def main():
+    print(sys.argv[1])
     isolate_test(sys.argv[1])
 
 main()

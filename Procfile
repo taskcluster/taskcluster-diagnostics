@@ -1,1 +1,1 @@
-worker: node src/spawn_tests.js
+worker: npm run compile && node lib/main.js
