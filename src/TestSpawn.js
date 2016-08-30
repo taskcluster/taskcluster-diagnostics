@@ -61,7 +61,7 @@ class TestSpawn {
     this.testProcess.stderr.on('data', addToBuffer);
 
     this.testProcess.on('message', (data) => {
-      this.json_result = data.result;
+      this.json_result = data;
       debug(data);
       console.log(data);
     });
@@ -82,17 +82,16 @@ class TestSpawn {
   async _uploadLogs () {
     await this.log_reporter.upload(this.outbuff);
     await this.json_reporter.upload(this.json_result);
-    this.monitor.measure('failed', this.json_result.fail.length);  
+    return this.monitor.measure('failed', this.json_result.fail.length);  
   }
 
   static async runTests (monitor) {
     let ts = new TestSpawn(monitor);
     return ts._spawnTests().then((result) =>{
-      if(result){
-        ts._uploadLogs();
-      }else {
+      if(!result){
         monitor.reportError("Diagnostics failed", 'ERROR');
       }
+      ts._uploadLogs();
     });
   }
 

@@ -1,1 +1,1 @@
-worker: npm run compile && node lib/main.js
+worker: npm run compile && node lib/main.js test

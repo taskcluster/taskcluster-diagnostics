@@ -14,7 +14,7 @@ let load = base.loader({
     setup: ({process, profile, cfg}) => base.monitor({
       project:      'taskcluster-diagnostics',
       credentials:  cfg.taskcluster.credentials,
-      mock:         true, //for now
+      mock:         profile === 'test', //for now
       process
     })
   },
@@ -28,6 +28,6 @@ let load = base.loader({
 }, ['profile', 'process']);
 
 load('diagnostics', {
-  profile: 'default',
+  profile: process.env.NODE_ENV,
   process: process.argv[2]
 });
