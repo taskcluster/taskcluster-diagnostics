@@ -8,8 +8,8 @@
   "main": "index.js",
   "scripts": {
     "compile": "babel-compile -p taskcluster src:lib",
-    "test": "npm run compile && node lib/test/test_server.js",
-    "spawn": "npm run compile && DEBUG=spawn node lib/spawn_tests.js"
+    "test": "npm run compile",
+    "install": "npm run compile"
   },
   "repository": {
     "type": "git",
