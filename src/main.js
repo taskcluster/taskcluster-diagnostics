@@ -6,7 +6,7 @@ let TestSpawn = require('./TestSpawn');
 let load = base.loader({
   cfg: {
     requires: ['profile'],
-    setup: ({profile}) => base.config({profile})
+    setup: ({profile}) => base.config({profile}),
   },
 
   monitor: {
@@ -16,15 +16,23 @@ let load = base.loader({
       credentials:  cfg.taskcluster.credentials,
       mock:         profile === 'test', //for now
       process
-    })
+    }),
   },
 
   diagnostics: {
-    requires: ['monitor'],
-    setup: async ({monitor}) =>{
-      return TestSpawn.runTests(monitor);
-    }
-  }
+    requires: ['process','monitor'],
+    setup: async ({process, monitor}) => { 
+      try{
+        await TestSpawn.runTests(monitor);
+        monitor.reportError('Diagnostics successful');
+        monitor.stopResourceMonitoring();
+      }catch(e){
+        console.error(e);
+      }
+      debugger;
+    },
+  },
+
 }, ['profile', 'process']);
 
 load('diagnostics', {

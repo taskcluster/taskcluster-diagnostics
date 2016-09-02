@@ -16,8 +16,7 @@ var base          = require('taskcluster-base');
 class TestSpawn {
   
   constructor (monitor) {
-    this.monitor = monitor;
-    //This is for monitoring
+    this.monitor = monitor || null;
     this.log_reporter = null;
     this.json_reporter = null;
     this.decoder = new StringDecoder('utf8');
@@ -72,7 +71,8 @@ class TestSpawn {
         this.outbuff += endMessage;
         return resolve(this.outbuff);
         
-      }).on('error', async() => {
+      }).on('error', async (error) => {
+        this.monitor.reportError(error);
         return resolve(null);
       });      
     });
@@ -80,19 +80,16 @@ class TestSpawn {
   }
 
   async _uploadLogs () {
+    this.monitor.measure('failed', this.json_result.fail.length);  
     await this.log_reporter.upload(this.outbuff);
     await this.json_reporter.upload(this.json_result);
-    return this.monitor.measure('failed', this.json_result.fail.length);  
   }
 
   static async runTests (monitor) {
     let ts = new TestSpawn(monitor);
-    return ts._spawnTests().then((result) =>{
-      if(!result){
-        monitor.reportError("Diagnostics failed", 'ERROR');
-      }
-      ts._uploadLogs();
-    });
+    await ts._spawnTests();
+    ts._uploadLogs();
+    return;
   }
 
 }
