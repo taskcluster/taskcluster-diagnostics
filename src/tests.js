@@ -12,7 +12,7 @@ var run = async () => {
   } catch (err) {
     console.error(err);
     if(process.send){
-      process.send('error', new Error("Failed to run tests"));
+      process.send(null);
     }
   }
 }

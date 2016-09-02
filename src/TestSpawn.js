@@ -7,6 +7,7 @@ var slugid        = require('slugid');
 var Reporter      = require('./reporter/Reporter');
 var debug         = require('debug')('spawn');
 var base          = require('taskcluster-base');
+var assume        = require('assume');
 /*
   This module generates a testId and spawns a TestRunner which runs tests and
   uploads raw logs.
@@ -16,7 +17,8 @@ var base          = require('taskcluster-base');
 class TestSpawn {
   
   constructor (monitor) {
-    this.monitor = monitor || null;
+    this.monitor = monitor;
+    assume(monitor != null);
     this.log_reporter = null;
     this.json_reporter = null;
     this.decoder = new StringDecoder('utf8');
@@ -69,27 +71,32 @@ class TestSpawn {
       return this.testProcess.on('close',async () => {
         var endMessage = "Tests ended at "+ (new Date()).toJSON() + "\n";
         this.outbuff += endMessage;
-        return resolve(this.outbuff);
+        return resolve();
         
       }).on('error', async (error) => {
-        this.monitor.reportError(error);
-        return resolve(null);
+        return reject(error);
       });      
     });
 
   }
 
   async _uploadLogs () {
-    this.monitor.measure('failed', this.json_result.fail.length);  
+    
     await this.log_reporter.upload(this.outbuff);
     await this.json_reporter.upload(this.json_result);
+    
+    return;
   }
 
   static async runTests (monitor) {
     let ts = new TestSpawn(monitor);
-    await ts._spawnTests();
-    ts._uploadLogs();
-    return;
+    try{
+      await ts._spawnTests();
+    }catch (e){
+      return null;
+    }
+    await ts._uploadLogs();
+    return ts.json_result;
   }
 
 }

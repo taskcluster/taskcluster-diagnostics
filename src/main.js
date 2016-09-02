@@ -10,9 +10,9 @@ let load = base.loader({
   },
 
   monitor: {
-    requires: ['cfg','process','profile'],
+    requires: ['cfg','profile'],
     setup: ({process, profile, cfg}) => base.monitor({
-      project:      'taskcluster-diagnostics',
+      project:      'tc-diagnostics',
       credentials:  cfg.taskcluster.credentials,
       mock:         profile === 'test', //for now
       process
@@ -20,22 +20,26 @@ let load = base.loader({
   },
 
   diagnostics: {
-    requires: ['process','monitor'],
-    setup: async ({process, monitor}) => { 
-      try{
-        await TestSpawn.runTests(monitor);
-        monitor.reportError('Diagnostics successful');
-        monitor.stopResourceMonitoring();
-      }catch(e){
-        console.error(e);
+    requires: ['monitor'],
+    setup: async ({monitor}) => { 
+      let result = await TestSpawn.runTests(monitor);
+
+      if(result){
+        result.fail.forEach(async test => {
+          await monitor.reportError('FAILED: ' + test);
+        });
+      }else{
+        await monitor.reportError('diagnostics.failed');
       }
-      debugger;
+
+      await monitor.reportError('diagnostics.successful', 'info', {});
+      monitor.measure('diagnostics.failed_test_count', result.fail.length);
+      await monitor.flush();
     },
   },
 
-}, ['profile', 'process']);
+}, ['profile']);
 
 load('diagnostics', {
-  profile: process.env.NODE_ENV,
-  process: process.argv[2]
+  profile:  process.env.NODE_ENV 
 });
