@@ -16,9 +16,7 @@ var assume        = require('assume');
 
 class TestSpawn {
   
-  constructor (monitor) {
-    this.monitor = monitor;
-    assume(monitor != null);
+  constructor () {
     this.log_reporter = null;
     this.json_reporter = null;
     this.decoder = new StringDecoder('utf8');
@@ -88,8 +86,8 @@ class TestSpawn {
     return;
   }
 
-  static async runTests (monitor) {
-    let ts = new TestSpawn(monitor);
+  static async runTests () {
+    let ts = new TestSpawn();
     try{
       await ts._spawnTests();
     }catch (e){
