@@ -1,1 +1,1 @@
-worker: node lib/main.js test
+worker: node lib/main.js
