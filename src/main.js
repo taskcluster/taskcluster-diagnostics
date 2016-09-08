@@ -22,8 +22,11 @@ let load = base.loader({
   diagnostics: {
     requires: ['monitor'],
     setup: async ({monitor}) => { 
+      // Running tests
       let result = await TestSpawn.runTests(monitor);
-
+      /* 
+       * Reporting to sentry and statsum.
+       */
       if(result){
         result.fail.forEach(async test => {
           await monitor.reportError('FAILED: ' + test);
@@ -35,6 +38,12 @@ let load = base.loader({
       await monitor.reportError('diagnostics.successful', 'info', {});
       monitor.measure('diagnostics.failed_test_count', result.fail.length);
       await monitor.flush();
+      /*
+       * Reporting via notify.
+       */
+      //TODO: Add notify email
+      //TODO: Add notify irc
+      //TODO: Add notify pulse
     },
   },
 

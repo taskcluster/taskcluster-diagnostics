@@ -19,10 +19,14 @@ class TestSpawn {
   constructor () {
     this.log_reporter = null;
     this.json_reporter = null;
-    this.decoder = new StringDecoder('utf8');
 
     this._spawnTests = this._spawnTests.bind(this);
     this._uploadLogs = this._uploadLogs.bind(this);
+    this.json_result = {
+      pass: [],
+      fail: []
+    };
+
   }
 
   async _spawnTests () {
@@ -30,11 +34,7 @@ class TestSpawn {
     let testId = slugid.nice();
 
     this.outbuff = '';
-    this.json_result = {
-      pass: [],
-      fail: []
-    };
-
+    
     this.log_reporter = Reporter.createLogReporter(testId);
     this.json_reporter = Reporter.createJSONReporter(testId);
     debug("Running tests with id",testId);
@@ -42,11 +42,12 @@ class TestSpawn {
     let startMessage = "Test started at " + (new Date()).toJSON() + "\n";
     this.outbuff += startMessage;
     debug(startMessage);
+    
+    let decoder = new StringDecoder('utf8');
 
     let addToBuffer = data => {
-      let str = this.decoder.write(data);
+      let str = decoder.write(data);
       this.outbuff += str;
-      console.log(str);
       debug(str);
     }
 
@@ -62,7 +63,6 @@ class TestSpawn {
     this.testProcess.on('message', (data) => {
       this.json_result = data;
       debug(data);
-      console.log(data);
     });
 
     return new Promise ((resolve, reject) =>{
