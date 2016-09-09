@@ -1,1 +1,1 @@
-worker: node src/spawn_tests.js
+worker: node lib/main.js

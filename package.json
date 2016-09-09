@@ -7,9 +7,9 @@
   },
   "main": "index.js",
   "scripts": {
-    "compile":  "babel-compile -p taskcluster src:lib",
-    "test":     "npm run compile && node lib/test/test_server.js",
-    "spawn":    "npm run compile && DEBUG=spawn node lib/spawn_tests.js"
+    "compile": "babel-compile -p taskcluster src:lib",
+    "test": "npm run compile",
+    "install": "npm run compile"
   },
   "repository": {
     "type": "git",
@@ -37,7 +37,7 @@
     "slugid": "^1.1.0",
     "superagent": "^2.0.0-alpha.3",
     "superagent-promise": "^1.1.0",
-    "taskcluster-base": "^0.13.0",
+    "taskcluster-base": "^6.2.0",
     "taskcluster-client": "^0.23.17"
   }
 }
