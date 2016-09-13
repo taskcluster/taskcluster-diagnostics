@@ -48,7 +48,7 @@ class Reporter {
           console.error(err);
           return reject(err);
         }
-        return resolve(data);
+        return resolve(Key);
       });
     });
   }

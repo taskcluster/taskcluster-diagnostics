@@ -26,7 +26,6 @@ class TestSpawn {
       pass: [],
       fail: []
     };
-
   }
 
   async _spawnTests () {
@@ -48,7 +47,7 @@ class TestSpawn {
     let addToBuffer = data => {
       let str = decoder.write(data);
       this.outbuff += str;
-      debug(str);
+      console.log(str);
     }
 
 
@@ -62,7 +61,7 @@ class TestSpawn {
 
     this.testProcess.on('message', (data) => {
       this.json_result = data;
-      debug(data);
+      console.log(data);
     });
 
     return new Promise ((resolve, reject) =>{
@@ -80,21 +79,25 @@ class TestSpawn {
 
   async _uploadLogs () {
     
-    await this.log_reporter.upload(this.outbuff);
-    await this.json_reporter.upload(this.json_result);
-    
-    return;
+    let raw_key = await this.log_reporter.upload(this.outbuff);
+    let json_key = await this.json_reporter.upload(this.json_result);
+    return { raw_key, json_key };
   }
 
   static async runTests () {
     let ts = new TestSpawn();
     try{
       await ts._spawnTests();
-    }catch (e){
+      let keys = await ts._uploadLogs();
+      debug(keys);
+      return {
+        keys,
+        result: ts.json_result
+      };
+    }catch(e){
+      console.error(e);
       return null;
     }
-    await ts._uploadLogs();
-    return ts.json_result;
   }
 
 }
