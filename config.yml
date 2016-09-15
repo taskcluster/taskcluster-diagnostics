@@ -22,3 +22,5 @@ defaults:
     credentials:
       accessKeyId:      !env AWS_ACCESS_KEY_ID
       secretAccessKey:  !env AWS_SECRET_KEY
+  
+  emails:             !env:list NOTIFY_EMAILS

@@ -1,7 +1,9 @@
 'use strict';
 
-let base      = require('taskcluster-base');
-let TestSpawn = require('./TestSpawn');
+let base        = require('taskcluster-base');
+let TestSpawn   = require('./TestSpawn');
+let debug       = require('debug')('diagnostics:main');
+let taskcluster = require('taskcluster-client');
 
 let load = base.loader({
   cfg: {
@@ -20,13 +22,39 @@ let load = base.loader({
   },
 
   diagnostics: {
-    requires: ['monitor'],
-    setup: async ({monitor}) => { 
+    requires: ['cfg','monitor'],
+    setup: async ({cfg, monitor}) => { 
       // Running tests
-      let result = await TestSpawn.runTests(monitor);
+      let data = await TestSpawn.runTests();
+      /*
+       * Reporting via notify.
+       */
+      debug(data);
+      let result = data.result;
+      let keys = data.keys;
+      //TODO: Add notify email
+      if(result.fail.length > 0){
+        let notify  = new taskcluster.Notify({
+            credentials: cfg.taskcluster.credentials
+        });
+        let subject = 'Diagnostics Test Failed: ' + (new Date()).toJSON();
+        let content = [`## Number of failing tests: ${result.fail.length}`];
+        result.fail.forEach(fail => content.push("* " + fail));
+        content = content.join("\n");
+        let link = {
+          text: "View raw logs",
+          href: "https://taskcluster-diagnostic-logs.s3.amazonaws.com/" + keys.raw_key
+        }
+        cfg.emails.forEach(async address => {
+          debug('sending email to ' + address);
+          await notify.email({ address, subject, content, link });
+        });
+      } 
       /* 
        * Reporting to sentry and statsum.
        */
+      
+
       if(result){
         result.fail.forEach(async test => {
           await monitor.reportError('FAILED: ' + test);
@@ -38,10 +66,7 @@ let load = base.loader({
       await monitor.reportError('diagnostics.successful', 'info', {});
       monitor.measure('diagnostics.failed_test_count', result.fail.length);
       await monitor.flush();
-      /*
-       * Reporting via notify.
-       */
-      //TODO: Add notify email
+      debug('reporting completed');
       //TODO: Add notify irc
       //TODO: Add notify pulse
     },
