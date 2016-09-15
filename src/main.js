@@ -33,14 +33,12 @@ let load = base.loader({
       let result = data.result;
       let keys = data.keys;
       //TODO: Add notify email
-      try{
+      if(result.fail.length > 0){
         let notify  = new taskcluster.Notify({
             credentials: cfg.taskcluster.credentials
         });
-        let subject = 'Diagnostics results: ' + (new Date()).toJSON();
-        let content = [`## Number of passing tests:  ${result.pass.length}`];
-        result.pass.forEach(pass => content.push("* " + pass));
-        content.push(`## Number of failing tests: ${result.fail.length}`);
+        let subject = 'Diagnostics Test Failed: ' + (new Date()).toJSON();
+        let content = [`## Number of failing tests: ${result.fail.length}`];
         result.fail.forEach(fail => content.push("* " + fail));
         content = content.join("\n");
         let link = {
@@ -51,9 +49,7 @@ let load = base.loader({
           debug('sending email to ' + address);
           await notify.email({ address, subject, content, link });
         });
-      }catch(e){
-        console.log(e);
-      }
+      } 
       /* 
        * Reporting to sentry and statsum.
        */

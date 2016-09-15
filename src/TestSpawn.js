@@ -86,18 +86,13 @@ class TestSpawn {
 
   static async runTests () {
     let ts = new TestSpawn();
-    try{
-      await ts._spawnTests();
-      let keys = await ts._uploadLogs();
-      debug(keys);
-      return {
-        keys,
-        result: ts.json_result
-      };
-    }catch(e){
-      console.error(e);
-      return null;
-    }
+    await ts._spawnTests();
+    let keys = await ts._uploadLogs();
+    debug(keys);
+    return {
+      keys,
+      result: ts.json_result
+    };
   }
 
 }
