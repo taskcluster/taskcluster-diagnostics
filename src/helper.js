@@ -1,4 +1,4 @@
-'use strict';
+
 var taskcluster = require('taskcluster-client');
 var base        = require('taskcluster-base');
 
@@ -6,35 +6,34 @@ var base        = require('taskcluster-base');
  * to be used throughout diagnostics.
  */
 
-
 var getHelper = profile => {
 
   let helper = {};
 
-  helper.cfg = base.config({ profile });
+  helper.cfg = base.config({profile});
 
   helper.queue = new taskcluster.Queue({
-    credentials:  helper.cfg.taskcluster.credentials
+    credentials:  helper.cfg.taskcluster.credentials,
   });
 
   helper.queueEvents = new taskcluster.QueueEvents();
 
   helper.listener = new taskcluster.PulseListener({
-    credentials: helper.cfg.pulse
+    credentials: helper.cfg.pulse,
   });
 
   helper.createNewListener = () => {
     return new taskcluster.PulseListener({
-      credentials: helper.cfg.pulse
-    })
-  }
+      credentials: helper.cfg.pulse,
+    });
+  };
 
   helper.secrets = new taskcluster.Secrets({
-    credentials: helper.cfg.taskcluster.credentials
-  })
+    credentials: helper.cfg.taskcluster.credentials,
+  });
 
   helper.index = new taskcluster.Index({
-    credentials: helper.cfg.taskcluster.credentials
+    credentials: helper.cfg.taskcluster.credentials,
   });
 
   helper.simpleTaskDef = taskId => {
@@ -42,67 +41,67 @@ var getHelper = profile => {
     deadline.setHours(deadline.getHours() + 2);
 
     return {
-      provisionerId:    "aws-provisioner-v1",
-      workerType:       "tutorial",
+      provisionerId:    'aws-provisioner-v1',
+      workerType:       'tutorial',
       created:          (new Date()).toJSON(),
       deadline:         deadline.toJSON(),
       schedulerId:      'tc-diagnostics',
       payload:  {
-        image:          "ubuntu:13.10",
+        image:          'ubuntu:13.10',
         command:  [
-          "/bin/bash",
-          "-c",
-          "echo \"Hello World\""
+          '/bin/bash',
+          '-c',
+          'echo "Hello World"',
         ],
-        maxRunTime: 600
+        maxRunTime: 600,
       },
       metadata: {
-        name:           "Example Task",
-        description:    "This task will prìnt `'Hello World'` **once**!",
-        owner:          "chinmaykousik1@gmail.com",
-        source:         "https://github.com/ckousik/taskcluster-diagnostics"
+        name:           'Example Task',
+        description:    'This task will prìnt `\'Hello World\'` **once**!',
+        owner:          'chinmaykousik1@gmail.com',
+        source:         'https://github.com/ckousik/taskcluster-diagnostics',
       },
       tags: {
-        objective:      "taskcluster-diagnostics queue test"
-      }
+        objective:      'taskcluster-diagnostics queue test',
+      },
     };
-  }
+  };
 
-  helper.exitTaskDefEnvVars = (taskId,status) => {
+  helper.exitTaskDefEnvVars = (taskId, status) => {
     let deadline = new Date();
     deadline.setHours(deadline.getHours() + 2);
 
     return {
-      provisionerId:    "aws-provisioner-v1",
-      workerType:       "tutorial",
+      provisionerId:    'aws-provisioner-v1',
+      workerType:       'tutorial',
       created:          (new Date()).toJSON(),
       deadline:         deadline.toJSON(),
       schedulerId:      'tc-diagnostics',
       payload:  {
-        image:          "ubuntu:13.10",
+        image:          'ubuntu:13.10',
         command:  [
-          "/bin/bash",
-          "-c",
-          "exit $MY_ENV_VAR"
+          '/bin/bash',
+          '-c',
+          'exit $MY_ENV_VAR',
         ],
         env: {
-          MY_ENV_VAR: status
+          MY_ENV_VAR: status,
         },
-        maxRunTime: 600
+        maxRunTime: 600,
       },
       metadata: {
-        name:           "Example Task",
-        description:    "This task will prìnt `'Hello World'` **once**!",
-        owner:          "chinmaykousik1@gmail.com",
-        source:         "https://github.com/ckousik/taskcluster-diagnostics"
+        name:           'Example Task',
+        description:    'This task will prìnt `\'Hello World\'` **once**!',
+        owner:          'chinmaykousik1@gmail.com',
+        source:         'https://github.com/ckousik/taskcluster-diagnostics',
       },
       tags: {
-        objective:      "taskcluster-diagnostics queue test"
-      }
+        objective:      'taskcluster-diagnostics queue test',
+      },
     };
-  }
+  };
 
   return helper;
-}
+};
 
 module.exports = getHelper();

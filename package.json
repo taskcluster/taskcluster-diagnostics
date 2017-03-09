@@ -2,14 +2,16 @@
   "name": "taskcluster-diagnostics",
   "version": "0.1.0",
   "description": "Run diagnostics against taskcluster services in production",
+  "engine-strict": true,
   "engines": {
-    "node": "4.4.4"
+    "node": "7.7.1",
+    "yarn": "0.21.3"
   },
   "main": "index.js",
   "scripts": {
     "compile": "babel-compile -p taskcluster src:lib",
-    "test": "npm run compile",
-    "install": "npm run compile",
+    "test": "yarn run compile && mocha ./test/lint.js",
+    "install": "yarn run compile",
     "spawn": "DEBUG=* node lib/main.js"
   },
   "repository": {
@@ -40,5 +42,11 @@
     "superagent-promise": "^1.1.0",
     "taskcluster-base": "^6.2.0",
     "taskcluster-client": "^1.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.17.1",
+    "eslint-config-taskcluster": "^2.0.0",
+    "eslint-plugin-taskcluster": "^1.0.2",
+    "mocha-eslint": "^3.0.1"
   }
 }

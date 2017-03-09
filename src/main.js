@@ -1,4 +1,3 @@
-'use strict';
 
 let base        = require('taskcluster-base');
 let TestSpawn   = require('./TestSpawn');
@@ -12,17 +11,17 @@ let load = base.loader({
   },
 
   monitor: {
-    requires: ['cfg','profile'],
+    requires: ['cfg', 'profile'],
     setup: ({process, profile, cfg}) => base.monitor({
       project:      'tc-diagnostics',
       credentials:  cfg.taskcluster.credentials,
       mock:         profile === 'test', //for now
-      process
+      process,
     }),
   },
 
   diagnostics: {
-    requires: ['cfg','monitor'],
+    requires: ['cfg', 'monitor'],
     setup: async ({cfg, monitor}) => { 
       // Running tests
       let data = await TestSpawn.runTests();
@@ -33,33 +32,32 @@ let load = base.loader({
       let result = data.result;
       let keys = data.keys;
       //TODO: Add notify email
-      if(result.fail.length > 0){
+      if (result.fail.length > 0) {
         let notify  = new taskcluster.Notify({
-            credentials: cfg.taskcluster.credentials
+          credentials: cfg.taskcluster.credentials,
         });
         let subject = 'Diagnostics Test Failed: ' + (new Date()).toJSON();
         let content = [`## Number of failing tests: ${result.fail.length}`];
-        result.fail.forEach(fail => content.push("* " + fail));
-        content = content.join("\n");
+        result.fail.forEach(fail => content.push('* ' + fail));
+        content = content.join('\n');
         let link = {
-          text: "View raw logs",
-          href: "https://taskcluster-diagnostic-logs.s3.amazonaws.com/" + keys.raw_key
-        }
+          text: 'View raw logs',
+          href: 'https://taskcluster-diagnostic-logs.s3.amazonaws.com/' + keys.raw_key,
+        };
         cfg.emails.forEach(async address => {
           debug('sending email to ' + address);
-          await notify.email({ address, subject, content, link });
+          await notify.email({address, subject, content, link});
         });
       } 
       /* 
        * Reporting to sentry and statsum.
        */
-      
 
-      if(result){
+      if (result) {
         result.fail.forEach(async test => {
           await monitor.reportError('FAILED: ' + test);
         });
-      }else{
+      } else {
         await monitor.reportError('diagnostics.failed');
       }
 
@@ -75,5 +73,5 @@ let load = base.loader({
 }, ['profile']);
 
 load('diagnostics', {
-  profile:  process.env.NODE_ENV 
+  profile:  process.env.NODE_ENV, 
 });
