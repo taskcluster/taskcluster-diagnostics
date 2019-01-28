@@ -1,6 +1,8 @@
 TaskCluster Diagnostics
 =======================
 
+**NOTE** The code in this repository no longer runs on a regular basis and has been retired.
+
 [![Build Status](https://travis-ci.org/ckousik/taskcluster-diagnostics.svg?branch=master)](https://travis-ci.org/ckousik/taskcluster-diagnostics)
 
 The taskcluster diagnotics component runs tests against the production
